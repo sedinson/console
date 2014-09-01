@@ -1,0 +1,82 @@
+.alarmize-container {
+    position: relative;
+    width: 250px;
+    border: #eee 1px solid;
+    padding: 5px;
+    overflow: auto;
+}
+.alarmize-container > * {
+    outline: none;
+}
+
+.alarmize-head {
+    position: relative;
+    border-bottom: #eee 2px solid;
+    padding-bottom: 5px;
+    overflow: auto;
+}
+
+.alarmize-clock {
+    position: relative;
+    float: left;
+}
+.alarmize-clock > * {
+    font-size: 36px;
+}
+.alarmize-clock select {
+    appearance:none;
+    -moz-appearance:window; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */
+    background-color: #fff;
+    text-indent: 0.01px;
+    text-overflow: '';
+    border: none;
+}
+
+.alarmize-delete {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    right: 0;
+}
+.alarmize-action {
+    position: absolute;
+    background: #fff;
+    border: #eee 1px solid;
+    padding: 2px 5px;
+    bottom: 5px;
+    right: 0;
+}
+
+.alarmize-day {
+    position: relative;
+    float: left;
+    margin: 3px 4px;
+    cursor: pointer;
+}
+.alarmize-day input[type=checkbox] {
+    display: none;
+}
+.alarmize-day span {
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: capitalize;
+}
+.alarmize-day input[type=checkbox]:checked + span {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.alarmize-save {
+    position: relative;
+    float: left;
+    width: 100%;
+    background: #eee;
+    border: none;
+    padding: 5px 0;
+    /*display: none;*/
+}
+
+/*.alarmize-container:hover .alarmize-save {
+    display: block;
+}*/

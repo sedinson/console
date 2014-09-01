@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Soluntech - Admin Console</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+
+    <!-- Page-Level Plugin CSS - Blank -->
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="welcome.html">
+                    <h1 id="logo">Soluntech - Console</h1>
+                </a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="profile.html"><i class="fa fa-user fa-fw"></i> Editar Perfil</a>
+                        </li>
+                        <li><a href="settings.html"><i class="fa fa-gear fa-fw"></i> Configurar</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:logout();"><i class="fa fa-sign-out fa-fw"></i> Finalizar Sesión</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li>
+                            <a href="welcome.html"><i class="fa fa-dashboard fa-fw"></i> Instancias</a>
+                        </li>
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h1 class="page-header">Editar Perfil</h1>
+                    <div class="col-lg-12" id="profile"></div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <h1 class="page-header">Cambiar Clave</h1>
+                    <form id="frm-cpw" role="form">
+                        <div class="form-group">
+                            <label for="old">Clave Actual:</label>
+                            <input type="password" name="old" id="old" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new">Clave Nueva:</label>
+                            <input type="password" name="new" id="new" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="repeat">Confirmar Clave Nueva:</label>
+                            <input type="password" name="repeat" id="repeat" class="form-control" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="submit" value="Cambiar Clave" class="form-control" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+
+    <!-- Page-Level Plugin Scripts - Blank -->
+
+    <script src="js/projectbase.js"></script>
+
+    <!-- SB Admin Scripts - Include with every page -->
+    <script src="js/sb-admin.js"></script>
+    
+    <script>
+        $(function () {
+            uget({
+                url: LinkServer.Url('user', 'active')
+            }).done(function (data) {
+                if(data._code !== 200) {
+                    logout();
+                } else {
+                    var c = $("#profile"), d = data._response;
+                    c.html("");
+                    
+                    var f = $("<form/>", {
+                        role: 'form',
+                        id: 'frm-profile'
+                    });
+                    
+                    var params = {
+                        name: {html: 'Nombre'},
+                        //user: {html: 'Usuario', readonly: 'readonly'},
+                        secretkey: {html: 'Clave Secreta'},
+                        accesskey: {html: 'Clave de Acceso'}
+                    };
+                    
+                    $("<input/>", {
+                        type: 'hidden',
+                        value: d.iduser,
+                        name: 'iduser'
+                    }).appendTo(f);
+                    
+                    for(p in params) {
+                        $("<div/>", {
+                            class: 'form-group'
+                        }).append(
+                            $("<label/>", {
+                                html: params[p].html + ": ",
+                                for: p
+                            })
+                        ).append(
+                            $("<input/>", {
+                                class: 'form-control',
+                                readonly: params[p].readonly,
+                                type: 'text',
+                                value: d[p],
+                                name: p,
+                                id: p
+                            })
+                        ).appendTo(f);
+                    }
+                    
+                    $("<div/>", {
+                        class: 'form-group'
+                    }).append(
+                        $("<input/>", {
+                            class: 'form-control',
+                            type: 'submit',
+                            value: 'Guardar Cambios'
+                        })
+                    ).appendTo(f);
+                    
+                    f.appendTo(c);
+                    
+                    f.submit(function (e) {
+                        e.preventDefault();
+
+                        var params = parametrizer($(this));
+                        
+                        uget({
+                            type: 'PUT',
+                            url: LinkServer.Url('user', 'edit'),
+                            data: params
+                        }).done(function (data) {
+                            if(data._code === 200) {
+                                alert("Cambios guardados");
+                            } else {
+                                alert(data._message);
+                            }
+                        });
+                    });
+                }
+            });
+            
+            $("#frm-cpw").submit(function (e) {
+                e.preventDefault();
+                
+                var params = parametrizer($(this));
+                
+                if(params.new == params.repeat) {
+                    uget({
+                        type: 'POST',
+                        url: LinkServer.Url('user', 'cpw'),
+                        data: params
+                    }).done(function (data) {
+                        if(data._code === 200) {
+                            alert("Clave Cambiada con exito");
+                        } else {
+                            alert("La clave anterior es inválida");
+                        }
+                    });
+                } else {
+                    alert("La nueva clave no coincide con la que repitió. Verifique los datos");
+                }
+            });
+        });
+        
+        function logout () {
+            uget({
+                url     : LinkServer.Url('user', 'logout')
+            }).done(function (data) {
+                location.href = 'index.html';
+            });
+        }
+    </script>
+
+    <!-- Page-Level Demo Scripts - Blank - Use for reference -->
+
+</body>
+
+</html>

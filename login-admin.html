@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Soluntech - Admin Console</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Por favor Inicia Sesión</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Usuario" id="user" name="email" type="email" autofocus>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Contraseña" name="password" id="pass" type="password" value="">
+                                </div>
+                                
+                                <!-- Change this to a button or input when using this as a form -->
+                                <a href="javascript:login();" class="btn btn-lg btn-success btn-block">Iniciar Sesión</a>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/projectbase.js"></script>
+
+    <!-- SB Admin Scripts - Include with every page -->
+    <script src="js/sb-admin.js"></script>
+    
+    <script>
+        $(function () {
+            uget({
+                url: LinkServer.Url('admin', 'active')
+            }).done(function (data) {
+                if(data._code === 200) {
+                    location.href = 'admin.html';
+                }
+            });
+        });
+        
+        function login () {
+            uget({
+                type    : 'POST',
+                url     : LinkServer.Url('admin', 'login'),
+                data    : {
+                    'user': $("#user").val(),
+                    'pass': $("#pass").val()
+                }
+            }).done(function (data) {
+                if(data._code === 200) {
+                    location.href = 'admin.html';
+                } else {
+                    alert("Usuario o clave inválidos");
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

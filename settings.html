@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Soluntech - Admin Console</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+
+    <!-- Page-Level Plugin CSS - Blank -->
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="welcome.html">
+                    <h1 id="logo">Soluntech - Console</h1>
+                </a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="profile.html"><i class="fa fa-user fa-fw"></i> Editar Perfil</a>
+                        </li>
+                        <li><a href="settings.html"><i class="fa fa-gear fa-fw"></i> Configurar</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:logout();"><i class="fa fa-sign-out fa-fw"></i> Finalizar Sesión</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li>
+                            <a href="welcome.html"><i class="fa fa-dashboard fa-fw"></i> Instancias</a>
+                        </li>
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <h1 class="page-header">Configuraciones</h1>
+                
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Usuarios que ven mis instancias
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <form role="form" id="frm-adduser">
+                                <div class="table-responsive">
+                                    <table class="table tablesorter table-striped table-bordered table-hover" id="table-users">
+                                        <thead>
+                                            <tr>
+                                                <th>Usuario</th>
+                                                <th>Nombre</th>
+                                                <td><b>Clave</b></td>
+                                                <td><b>Eliminar</b></td>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody></tbody>
+
+                                        <tfoot>
+                                            <tr>
+                                                <td><input type="text" class="form-control" name="user" placeholder="Usuario" /></td>
+                                                <td><input type="text" class="form-control" name="name" placeholder="Nombre" /></td>
+                                                <td><input type="password" class="form-control" name="pass" placeholder="Clave" /></td>
+                                                <td><input type="submit" class="form-control" value="Agregar" /></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            </form>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+
+    <!-- Page-Level Plugin Scripts - Blank -->
+
+    <script src="js/projectbase.js"></script>
+
+    <!-- SB Admin Scripts - Include with every page -->
+    <script src="js/sb-admin.js"></script>
+    
+    <script>
+        var first = true;
+        
+        function loadUsers () {
+            uget({
+                url: LinkServer.Url('account', 'users')
+            }).done(function (data) {
+                if(data._code === 200) {
+                    var table = $("#table-users tbody");
+                    table.html("");
+                    
+                    for(var i in data._response) {
+                        var d = data._response[i];
+                        $("<tr/>").append(
+                            $("<td/>", {
+                                html: d.user
+                            })
+                        ).append(
+                            $("<td/>", {
+                                html: d.name
+                            })
+                        ).append(
+                            $("<td/>").html(
+                                $("<a/>", {
+                                    html: 'cambiar',
+                                    href: 'javascript: user.change(' + d.iduser + ')'
+                                })
+                            )
+                        ).append(
+                            $("<td/>").html(
+                                $("<a/>", {
+                                    html: 'eliminar',
+                                    class: 'red',
+                                    href: 'javascript: user.delete(' + d.iduser + ')'
+                                })
+                            )
+                        ).appendTo(table);
+                    }
+                    
+                    if(first) {
+                        $("#table-users").tablesorter();
+                        first = false;
+                    }
+                } else {
+                    alert("No tienes suficientes permisos para estar en esta seccion.");
+                }
+            });
+        }
+        
+        $(function () {
+            uget({
+                url: LinkServer.Url('user', 'active')
+            }).done(function (data) {
+                if(data._code !== 200) {
+                    logout();
+                } else {
+                    loadUsers();
+                }
+            });
+            
+            $("#frm-adduser").submit(function (e) {
+                e.preventDefault();
+                
+                params = parametrizer($(this));
+                uget({
+                    type: 'POST',
+                    url: LinkServer.Url('user', 'register'),
+                    data: params
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        loadUsers();
+                        alert("Usuario agregado!");
+                    } else {
+                        alert(data._message);
+                    }
+                });
+            });
+        });
+        
+        function logout () {
+            uget({
+                url     : LinkServer.Url('user', 'logout')
+            }).done(function (data) {
+                location.href = 'index.html';
+            });
+        }
+        
+        var user = {
+            change: function (id) {
+                var pass_new = prompt("Escriba la nueva clave");
+                
+                if(pass_new.length > 0) {
+                    uget({
+                        type: 'POST',
+                        url: LinkServer.Url('user', 'cpw'),
+                        data: {
+                            iduser: id,
+                            new: pass_new
+                        }
+                    }).done(function (data) {
+                        if(data._code != 200) {
+                            alert("No se pudo cambiar la clave del usuario: " + data._message);
+                        } else {
+                            alert("Clave cambiada");
+                        }
+                    });
+                }
+            },
+            delete: function (id) {
+                uget({
+                    type: 'DELETE',
+                    url: LinkServer.Url('user', 'delete'),
+                    data: {
+                        iduser: id
+                    }
+                }).done(function (data) {
+                    loadUsers();
+                    if(data._code != 200) {
+                        alert("No se pudo eliminar el usuario: " + data._message);
+                    } else {
+                        alert("Usuario eliminado");
+                    }
+                });
+            }
+        }
+    </script>
+
+    <!-- Page-Level Demo Scripts - Blank - Use for reference -->
+
+</body>
+
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Soluntech - Admin Console</title>
+
+    <!-- Core CSS - Include with every page -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/alarmize.jquery.css" />
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+    <link rel="shortcut icon" type="image/png" href="css/imgs/favicon.png"/>
+
+    <!-- Page-Level Plugin CSS - Blank -->
+
+    <!-- SB Admin CSS - Include with every page -->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="welcome.html">
+                    <h1 id="logo">Soluntech - Console</h1>
+                </a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="profile.html"><i class="fa fa-user fa-fw"></i> Editar Perfil</a>
+                        </li>
+                        <li><a href="settings.html"><i class="fa fa-gear fa-fw"></i> Configurar</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:logout();"><i class="fa fa-sign-out fa-fw"></i> Finalizar Sesión</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li>
+                            <a href="welcome.html"><i class="fa fa-dashboard fa-fw"></i> Instancias</a>
+                        </li>
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div id="instances-page">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Instancias</h1>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <!-- /.row -->
+
+                <form id="frm-instances">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Todas mis instancias
+
+                                    <div class="panel-buttons">
+                                        <button type="button" id="start" class="btn btn-success">Iniciar</button>
+                                        <button type="button" id="stop" class="btn btn-danger">Detener</button>
+                                        <button type="button" id="reboot" class="btn btn-warning">Reiniciar</button>
+                                    </div>
+                                </div>
+                                <!-- /.panel-heading -->
+                                <div class="panel-body">
+                                    <div class="table-responsive">
+                                        <table class="table tablesorter table-striped table-bordered table-hover" id="table-instances">
+                                            <thead>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" id="checkAll" />
+                                                    </td>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>Arquitectura</th>
+                                                    <th>Estado</th>
+                                                    <th>Horarios</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.table-responsive -->
+                                </div>
+                                <!-- /.panel-body -->
+                            </div>
+                            <!-- /.panel -->
+                        </div>
+                        <!-- /.col-lg-12 -->
+                    </div>
+                </form>
+            </div>
+            
+            <div id="scheduler-page">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Tareas Programadas</h1>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <!-- /.row -->
+                
+                <div class="row">
+                    <div class="col-lg-12" id="schedulerWork"></div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+
+    <!-- Page-Level Plugin Scripts - Blank -->
+
+    <script src="js/projectbase.js"></script>
+
+    <!-- SB Admin Scripts - Include with every page -->
+    <script src="js/sb-admin.js"></script>
+    <script src="js/alarmize.jquery.js"></script>
+    
+    <script>
+        var _status = {
+            0  : 'Pendiente...',
+            16 : 'Corriendo',
+            32 : 'Apagando...',
+            48 : 'Finalizado',
+            64 : 'Deteniendo...',
+            80 : 'Detenido'
+        }, first = true;
+        
+        var Instances = {
+            list: {},
+            selected: null,
+            load: function () {
+                uget({
+                    url: LinkServer.Url('account', 'instances')
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        var table = $("#table-instances");
+                        
+                        //Analizar si hay que borrar una instancia en la lista que tenemos previamente
+                        for(var _instanceId in Instances.list) {
+                            var sw = false;
+                            for(var i=0; i<data._response.length; i++) {
+                                sw = (sw)? true : data._response[i].InstanceId == _instanceId;
+                            }
+                            
+                            if(!sw) {
+                                table.find("#" + _instanceId).remove();
+                                delete Instances.list[_instanceId];
+                                console.log("removed " + _instanceId);
+                            }
+                        }
+                        
+                        //Analizar las instancias regresadas por el Rest
+                        for(var i=0; i<data._response.length; i++) {
+                            var tmp = data._response[i];
+                            
+                            if(Instances.list[tmp.InstanceId]) {
+                                var instance = table.find("#" + tmp.InstanceId);
+                                
+                                instance.find(".i_name").html(tmp.Name);
+                                instance.find(".i_status").html(
+                                    $("<span/>", {
+                                        class: 'st-' + tmp.State.Code,
+                                        html: _status[tmp.State.Code]
+                                    })
+                                );
+                                instance.find(".i_arch").html(tmp.Architecture);
+                                instance.find(".i_type").html(tmp.Type);
+                                instance.find(".i_launch").find("button").html(
+                                            "<i class='fa fa-clock-o fa-fw'></i> " + tmp.schedulers + ' horario' + ((tmp.schedulers == 1)? "" : "s")
+                                        )
+                            } else {
+                                var tr = $("<tr/>", {
+                                    id: tmp.InstanceId,
+                                    class: 'gradeA'
+                                });
+                                
+                                $("<td/>")
+                                    .append(
+                                        $("<input/>", {
+                                            type: 'checkbox',
+                                            name: 'instance',
+                                            value: tmp.InstanceId
+                                        })
+                                    ).appendTo(tr);
+                                
+                                $("<td/>", {
+                                    class: 'i_name',
+                                    html: tmp.Name
+                                }).appendTo(tr);
+                                
+                                $("<td/>", {
+                                    class: 'i_type',
+                                    html: tmp.Type
+                                }).appendTo(tr);
+                                
+                                $("<td/>", {
+                                    class: 'i_arch',
+                                    html: tmp.Architecture
+                                }).appendTo(tr);
+                                
+                                $("<td/>", {
+                                    class: 'i_status'
+                                }).html(
+                                    $("<span/>", {
+                                        class: 'st-' + tmp.State.Code,
+                                        html: _status[tmp.State.Code]
+                                    })
+                                ).appendTo(tr);
+                                
+                                (function (_tmp) {
+                                    $("<td/>", {
+                                        class: 'i_launch'
+                                    }).html(
+                                        $("<button/>", {
+                                            class: 'btn btn-regular'
+                                        }).html(
+                                            "<i class='fa fa-clock-o fa-fw'></i> " + _tmp.schedulers + ' horario' + ((_tmp.schedulers == 1)? "" : "s")
+                                        ).click(function (e) {
+                                            e.preventDefault();
+
+                                            Instances.scheduler(_tmp.InstanceId, _tmp.Name);
+                                        })
+                                    ).appendTo(tr);
+                                })(tmp);
+                                
+                                tr.appendTo(table);
+                            }
+                            
+                            Instances.list[tmp.InstanceId] = {
+                                Name         : tmp.Name,
+                                Type         : tmp.Type,
+                                Architecture : tmp.Architecture,
+                                Status       : tmp.State.Code,
+                                Launch       : tmp.Launch
+                            };
+                        }
+                        
+                        if(first) {
+                            table.tablesorter();
+                            first = false;
+                        }
+                    }
+                });
+            },
+            refresh: function () {
+                Instances.load();
+                setTimeout(function () {
+                    Instances.refresh();
+                }, 10000);
+            },
+            scheduler: function (instanceID, instanceName) {
+                Instances.selected = instanceID;
+                
+                $("#instances-page").css({
+                    display: 'none'
+                });
+                
+                $("#scheduler-page").css({
+                    display: 'block'
+                }).find(".page-header").html(
+                    instanceName
+                ).append(
+                    $("<a/>", {
+                        href: '#',
+                        html: '[volver]'
+                    }).css({
+                        'font-size': '0.6em',
+                        position: 'relative',
+                        float: 'right'
+                    }).click(function (e) {
+                        e.preventDefault();
+                        
+                        $("#instances-page").css({
+                            display: 'block'
+                        });
+
+                        $("#scheduler-page").css({
+                            display: 'none'
+                        });
+                    })
+                );
+                
+                uget({
+                    type: 'GET',
+                    url: LinkServer.Url('scheduler', 'get', {
+                        instanceID: instanceID
+                    })
+                }).done(function (data) {
+                    var workflow = $("#schedulerWork");
+
+                    if(data._code == 200) {
+                        workflow.empty();
+                        
+                        for(var i in data._response) {
+                            var ob = data._response[i]
+                              , tmp = ob._hour.split(':')
+                              , params = {
+                                    hour: tmp[0],
+                                    min: tmp[1],
+                                    action: ob._action,
+                                    instanceID: ob.instanceID,
+                                    days: ob._day
+                                }
+                            ;
+
+                            $("<div/>", {
+                                class: 'floatining'
+                            }).appendTo(
+                                workflow
+                            ).alarmize(function (event, data, prev) {
+                                event.preventDefault();
+                                
+                                newAlarm(data, prev);
+                            }, params, {
+                                readonly: false,
+                                onDelete: function (prev) {
+                                    var remove = confirm("Desea eliminar la alarma?");
+                                    
+                                    if(remove) {
+                                        var del = {
+                                            instanceID: prev.instanceID,
+                                            _hour: prev.hour + ':' + prev.min
+                                        }
+
+                                        uget({
+                                            type: 'DELETE',
+                                            url: LinkServer.Url('scheduler', 'delete'),
+                                            data: del
+                                        }).done(function (data) {
+                                            if(data._code == 200) {
+                                                alert("Alarma eliminada");
+                                                Instances.scheduler(prev.instanceID, prev.instanceName);
+                                            } else {
+                                                alert(data._message);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        
+                        $("<div/>", {
+                            class: 'floatining newe'
+                        }).appendTo(
+                            workflow
+                        ).alarmize(function (event, data, prev) {
+                            event.preventDefault();
+
+                            newAlarm(data, prev);
+                        }, {instanceID: instanceID, instanceName: instanceName}, {readonly: false, textSave: 'AÑADIR', onDelete: false});
+                    } else {
+                        alert(data._message);
+                    }
+                });
+            }
+        };
+        
+        function newAlarm (data, prev) {
+            var del = {
+                instanceID: prev.instanceID,
+                _hour: prev.hour + ':' + prev.min
+            }
+
+            uget({
+                type: 'DELETE',
+                url: LinkServer.Url('scheduler', 'delete'),
+                data: del
+            }).done(function (d) {
+                if(d._code == 200) {
+                    var params = {
+                        instanceID  : prev.instanceID,
+                        _hour       : data[0].value + ':' + data[1].value,
+                        _action     : data[2].value,
+                        days        : []
+                    };
+
+                    for(var i in data) {
+                        if(data[i].name == 'day') {
+                            params.days.push(data[i].value);
+                        }
+                    }
+
+                    uget({
+                        type: 'POST',
+                        url: LinkServer.Url('scheduler', 'add'),
+                        data: params
+                    }).done(function (data) {
+                        if(data._code == 200) {
+                            alert("Alarmas configuradas");
+                            Instances.scheduler(prev.instanceID, prev.instanceName);
+                        } else {
+                            alert(data._message);
+                        }
+                    });
+                } else {
+                    alert(data._message);
+                }
+            });
+        }
+        
+        $(function () {
+            uget({
+                url: LinkServer.Url('user', 'active')
+            }).done(function (data) {
+                if(data._code !== 200) {
+                    logout();
+                }
+            });
+            
+            $("#checkAll").click(function () {
+                var sw = $(this).is(':checked');
+                console.log(sw);
+                $("#table-instances tbody input[type=checkbox]").prop('checked', sw);
+            });
+            
+            $("#start").click(function (e) {
+                e.preventDefault();
+                
+                var start = confirm("Desea iniciar las instancias seleccionadas?");
+                
+                if(start) {
+                    var form = $("#frm-instances");
+                    var checks = parametrizer(form, true);
+                    var instancesId = checks.instance.join('|');
+                    uget({
+                        url: LinkServer.Url('instance', 'start', {
+                            instanceids: encodeURIComponent(instancesId)
+                        })
+                    }).done(function (data) {
+                        if(data._code === 200) {
+                            Instances.load();
+                        } else {
+                            alert(data._message);
+                        }
+                    });
+                }
+            });
+            
+            $("#stop").click(function (e) {
+                e.preventDefault();
+                
+                var stop = confirm("Desea detener las instancias seleccionadas?");
+                
+                if(stop) {
+                    var form = $("#frm-instances");
+                    var checks = parametrizer(form, true);
+                    var instancesId = checks.instance.join('|');
+                    uget({
+                        url: LinkServer.Url('instance', 'stop', {
+                            instanceids: encodeURIComponent(instancesId)
+                        })
+                    }).done(function (data) {
+                        if(data._code === 200) {
+                            Instances.load();
+                        } else {
+                            alert(data._message);
+                        }
+                    });
+                }
+            });
+            
+            $("#reboot").click(function (e) {
+                e.preventDefault();
+                
+                var reboot = confirm("Desea reiniciar las instancias seleccionadas?");
+                
+                if(reboot) {
+                    var form = $("#frm-instances");
+                    var checks = parametrizer(form, true);
+                    var instancesId = checks.instance.join('|');
+                    uget({
+                        url: LinkServer.Url('instance', 'reboot', {
+                            instanceids: encodeURIComponent(instancesId)
+                        })
+                    }).done(function (data) {
+                        if(data._code === 200) {
+                            Instances.load();
+                        } else {
+                            alert(data._message);
+                        }
+                    });
+                }
+            });
+            
+            Instances.refresh();
+        });
+        
+        function logout () {
+            uget({
+                url     : LinkServer.Url('user', 'logout')
+            }).done(function (data) {
+                location.href = 'index.html';
+            });
+        }
+    </script>
+
+    <!-- Page-Level Demo Scripts - Blank - Use for reference -->
+
+</body>
+
+</html>
