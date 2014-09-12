@@ -48,6 +48,25 @@
         </div>
     </div>
 
+    <!-- Modal by Default -->
+    <div id="myModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="mySmallModalLabel">Console - Soluntech</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="contex-text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Scripts - Include with every page -->
     <script src="js/jquery-1.10.2.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -67,6 +86,18 @@
                 }
             });
         });
+
+        $('#pass').keypress(function(e){
+            if(e.which == 13) {
+                login();
+                console.log('You pressed enter!');
+            }
+        });
+
+        function showModal(context){
+            $('.contex-text').text(context);
+            $('#myModal').modal('show');
+        }
         
         function login () {
             uget({
@@ -80,7 +111,7 @@
                 if(data._code === 200) {
                     location.href = 'admin.html';
                 } else {
-                    alert("Usuario o clave inválidos");
+                    showModal("Usuario o clave inválidos");
                 }
             });
         }

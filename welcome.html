@@ -42,6 +42,7 @@
 
             <ul class="nav navbar-top-links navbar-right">
                 <!-- /.dropdown -->
+                <li><a id="stateServices">Servicio [On]</a></li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
@@ -104,9 +105,11 @@
                                     Todas mis instancias
 
                                     <div class="panel-buttons">
-                                        <button type="button" id="start" class="btn btn-success">Iniciar</button>
-                                        <button type="button" id="stop" class="btn btn-danger">Detener</button>
-                                        <button type="button" id="reboot" class="btn btn-warning">Reiniciar</button>
+                                        <div class="btn-group">
+                                            <button type="button" id="start" class="btn btn-success">Iniciar</button>
+                                            <button type="button" id="stop" class="btn btn-danger">Detener</button>
+                                            <button type="button" id="reboot" class="btn btn-warning">Reiniciar</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- /.panel-heading -->
@@ -120,9 +123,11 @@
                                                     </td>
                                                     <th>Nombre</th>
                                                     <th>Tipo</th>
-                                                    <th>Arquitectura</th>
+                                                    <!-- <th>Arquitectura</th> -->
                                                     <th>Estado</th>
+                                                    <th>IP Privada / Publica</th>
                                                     <th>Horarios</th>
+                                                    <th>Alarmas</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -152,11 +157,57 @@
                     <div class="col-lg-12" id="schedulerWork"></div>
                 </div>
             </div>
+
+            <div id="alarms-page">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">Alarmas Programadas</h1>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <!-- /.row -->
+                
+                <div class="row">
+                    <div class="col-lg-12" id="alarmsWork">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="active"><a href="#cpu" role="tab" data-toggle="tab">Consumo CPU</a></li>
+                            <li><a href="#billing" role="tab" data-toggle="tab">Consumo de Dinero</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="cpu">
+
+                            </div>
+                            <div class="tab-pane" id="billing">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /#page-wrapper -->
 
     </div>
     <!-- /#wrapper -->
+
+    <!-- Modal by Default -->
+    <div id="myModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="mySmallModalLabel">Console - Soluntech</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="contex-text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Core Scripts - Include with every page -->
     <script src="js/jquery-1.10.2.js"></script>
@@ -181,7 +232,9 @@
             64 : 'Deteniendo...',
             80 : 'Detenido'
         }, first = true;
-        
+
+        $('#stateServices').text('Servicio [Off]');
+
         var Instances = {
             list: {},
             selected: null,
@@ -189,6 +242,8 @@
                 uget({
                     url: LinkServer.Url('account', 'instances')
                 }).done(function (data) {
+                    $('#stateServices').text('Servicio [On]');
+                    console.log('Servicio [On]');
                     if(data._code === 200) {
                         var table = $("#table-instances");
                         
@@ -220,11 +275,15 @@
                                         html: _status[tmp.State.Code]
                                     })
                                 );
-                                instance.find(".i_arch").html(tmp.Architecture);
+                                // instance.find(".i_arch").html(tmp.Architecture);
+                                instance.find(".i_ip").html(tmp.PrivateIp ? tmp.PrivateIp + (tmp.PublicIp ? " / " + tmp.PublicIp : '') : '');
                                 instance.find(".i_type").html(tmp.Type);
                                 instance.find(".i_launch").find("button").html(
                                             "<i class='fa fa-clock-o fa-fw'></i> " + tmp.schedulers + ' horario' + ((tmp.schedulers == 1)? "" : "s")
-                                        )
+                                        );
+                                instance.find(".i_alarm").find("button").html(
+                                            "<i class='fa fa-clock-o fa-fw'></i> " + tmp.Alarms + ' alarma' + ((tmp.Alarms == 1)? "" : "s")
+                                        );
                             } else {
                                 var tr = $("<tr/>", {
                                     id: tmp.InstanceId,
@@ -251,11 +310,6 @@
                                 }).appendTo(tr);
                                 
                                 $("<td/>", {
-                                    class: 'i_arch',
-                                    html: tmp.Architecture
-                                }).appendTo(tr);
-                                
-                                $("<td/>", {
                                     class: 'i_status'
                                 }).html(
                                     $("<span/>", {
@@ -263,6 +317,11 @@
                                         html: _status[tmp.State.Code]
                                     })
                                 ).appendTo(tr);
+                                
+                                $("<td/>", {
+                                    class: 'i_ip',
+                                    html: tmp.PrivateIp ? tmp.PrivateIp + (tmp.PublicIp ? " / " + tmp.PublicIp : '') : ''
+                                }).appendTo(tr);
                                 
                                 (function (_tmp) {
                                     $("<td/>", {
@@ -276,6 +335,22 @@
                                             e.preventDefault();
 
                                             Instances.scheduler(_tmp.InstanceId, _tmp.Name);
+                                        })
+                                    ).appendTo(tr);
+                                })(tmp);
+
+                                (function (_tmp) {
+                                    $("<td/>", {
+                                        class: 'i_alarm'
+                                    }).html(
+                                        $("<button/>", {
+                                            class: 'btn btn-regular'
+                                        }).html(
+                                            "<i class='fa fa-clock-o fa-fw'></i> " + _tmp.Alarms + ' alarma' + ((_tmp.Alarms == 1)? "" : "s")
+                                        ).click(function (e) {
+                                            e.preventDefault();
+
+                                            Instances.alarms(_tmp.InstanceId, _tmp.Name);
                                         })
                                     ).appendTo(tr);
                                 })(tmp);
@@ -297,6 +372,9 @@
                             first = false;
                         }
                     }
+                }).error(function (data){
+                    $('#stateServices').text('Servicio [Off]');
+                    console.log('Servicio [Off]');
                 });
             },
             refresh: function () {
@@ -367,11 +445,11 @@
                             ).alarmize(function (event, data, prev) {
                                 event.preventDefault();
                                 
-                                newAlarm(data, prev);
+                                newScheduler(data, prev);
                             }, params, {
                                 readonly: false,
                                 onDelete: function (prev) {
-                                    var remove = confirm("Desea eliminar la alarma?");
+                                    var remove = confirm("Desea eliminar la tarea?");
                                     
                                     if(remove) {
                                         var del = {
@@ -385,10 +463,10 @@
                                             data: del
                                         }).done(function (data) {
                                             if(data._code == 200) {
-                                                alert("Alarma eliminada");
+                                                showModal('Tarea eliminada');
                                                 Instances.scheduler(prev.instanceID, prev.instanceName);
                                             } else {
-                                                alert(data._message);
+                                                showModal(data._message);
                                             }
                                         });
                                     }
@@ -403,16 +481,337 @@
                         ).alarmize(function (event, data, prev) {
                             event.preventDefault();
 
-                            newAlarm(data, prev);
+                            newScheduler(data, prev);
                         }, {instanceID: instanceID, instanceName: instanceName}, {readonly: false, textSave: 'AÑADIR', onDelete: false});
                     } else {
-                        alert(data._message);
+                        showModal(data._message);
                     }
                 });
+            },
+            alarms: function (instanceID, instanceName) {
+                Instances.selected = instanceID;
+                
+                $("#instances-page").css({
+                    display: 'none'
+                });
+                
+                $("#alarms-page").css({
+                    display: 'block'
+                }).find(".page-header").html(
+                    instanceName
+                ).append(
+                    $("<a/>", {
+                        href: '#',
+                        html: '[volver]'
+                    }).css({
+                        'font-size': '0.6em',
+                        position: 'relative',
+                        float: 'right'
+                    }).click(function (e) {
+                        e.preventDefault();
+                        
+                        $("#instances-page").css({
+                            display: 'block'
+                        });
+
+                        $("#alarms-page").css({
+                            display: 'none'
+                        });
+                    })
+                );
+
+                var workflow = $("#cpu");
+                workflow.empty();
+                        
+                $("#cpu").append(
+                    '<br>'+
+                    '<div class="well col-md-4 init">'+
+                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Siempre que sea: </label>'+
+                                    '<select class="form-control">'+
+                                        '<option value="Average">Promedio</option>'+
+                                        '<option value="Minimum">Minimo</option>'+
+                                        '<option value="Sum">Total</option>'+
+                                        '<option value="SampleCount">SampleCount</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>De:</label>'+
+                                    '<select class="form-control">'+
+                                        '<option value="CPU Utilization">Consumo de CPU</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Es:</label>'+
+                                    '<select class="form-control">'+
+                                        '<option value="GreaterThanThreshold">></option>'+
+                                        '<option value="GreaterThanOrEqualToThreshold">>=</option>'+
+                                        '<option value="LessThanThreshold"><</option>'+
+                                        '<option value="LessThanOrEqualToThreshold"><=</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Porcentaje:</label>'+
+                                    '<input class="form-control" type="text" value="10">'+
+                                '</div>'+
+                            '</div>'+  
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Por lo menos:</label><br>'+
+                                    '<input class="form-control" type="text" value="1">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Período(s) de</label>'+
+                                    '<select class="form-control">'+
+                                        '<option value="300">5 Minutos</option>'+
+                                        '<option value="900">15 Minutos</option>'+
+                                        '<option value="3600">1 Hora</option>'+
+                                        '<option value="21600">6 Hora</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    // '<input id="showComboxCpu" type="checkbox"> '+
+                                    '<label>Realice la acción:</label>'+
+                                    '<fieldset id="changeCombox">'+
+                                        '<select id="disabledSelect" class="form-control">'+
+                                            '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                            '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                        '</select>'+
+                                    '</fieldset>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Cuando esta alarma:</label>'+
+                                    '<select class="form-control">'+
+                                        '<option value="1">Estado de Alarma</option>'+
+                                        '<option value="2">Estado Ok</option>'+
+                                        '<option value="3">Estado Insuficiente</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Nombre de Alarma:</label>'+
+                            '<input class="form-control" type="text" value="awsec2-i-b1e6569c-CPU-Utilization"><hr>'+
+                        '</div>'+
+                        '<div class="text-right">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6 text-center">'+
+                                    // '<div class="alert alert-warning" role="alert" style="padding:6px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>'+
+                                    // '<div class="alert alert-danger" role="alert" style="padding:6px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>'+
+                                    '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'
+                );
+
+                $("#cpu").append(
+                    '<div class="well col-md-4 init">'+
+                        '<br>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Siempre que sea: </label>'+
+                                    '<select id="newStatistic" class="form-control">'+
+                                        '<option value="Average">Promedio</option>'+
+                                        '<option value="Minimum">Minimo</option>'+
+                                        '<option value="Maximum">Maximo</option>'+
+                                        '<option value="Sum">Total</option>'+
+                                        '<option value="SampleCount">SampleCount</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>De:</label>'+
+                                    '<select id="newMetricName" onchange="createNameAlarm(\''+ instanceID +'\')" class="form-control">'+
+                                        '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                        '<option value="DiskReadBytes">Red sin Servicio</option>'+
+                                        '<option value="DiskReadOps">Red sin Servicio</option>'+
+                                        '<option value="DiskWriteBytes">Red sin Servicio</option>'+
+                                        '<option value="NetworkIn">Red sin Servicio</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Es:</label>'+
+                                    '<select id="newComparisonOperator" class="form-control">'+
+                                        '<option value="GreaterThanThreshold">></option>'+
+                                        '<option value="GreaterThanOrEqualToThreshold">>=</option>'+
+                                        '<option value="LessThanThreshold"><</option>'+
+                                        '<option value="LessThanOrEqualToThreshold"><=</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Porcentaje:</label>'+
+                                    '<input id="newThreshold" class="form-control" type="text">'+
+                                '</div>'+
+                            '</div>'+  
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Por lo menos:</label>'+
+                                    '<input id="newEvaluationPeriods" class="form-control" type="text">'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Período(s) de</label>'+
+                                    '<select id="newPeriod" class="form-control">'+
+                                        '<option value="300">5 Minutos</option>'+
+                                        '<option value="900">15 Minutos</option>'+
+                                        '<option value="3600">1 Hora</option>'+
+                                        '<option value="21600">6 Hora</option>'+
+                                        '<option value="86400">1 Dia</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    // '<input id="showComboxCpu" type="checkbox"> '+
+                                    '<label>Realice la acción:</label>'+
+                                    '<fieldset id="changeCombox">'+
+                                        '<select id="newActionAlarm" class="form-control">'+
+                                            '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                            '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                        '</select>'+
+                                    '</fieldset>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>Cuando esta alarma:</label>'+
+                                    '<select id="newSelectAlarm" class="form-control">'+
+                                        '<option value="alarm">Estado de Alarma</option>'+
+                                        '<option value="ok">Estado Ok</option>'+
+                                        '<option value="insufficient">Estado Insuficiente</option>'+
+                                    '</select>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Nombre de Alarma:</label>'+
+                            '<input id="newNameAlarm" class="form-control" type="text" value="awsec2-'+ instanceID +'-CPUUtilization">'+
+                        '</div>'+
+                        '<hr>'+
+                        '<div class="text-right">'+
+                            '<button onclick="createAlarm(\''+ instanceID +'\')" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>'+
+                        '</div>'+
+                    '</div>'
+                );
+
+                var workflow = $("#billing");
+                workflow.empty();
+
+                $("#billing").append(
+                    '<br><div class="well col-md-4 init">'+
+                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
+                        '<div class="form-group">'+
+                            '<label>Nombre:</label> '+
+                            '<input class="form-control" type="text" value="EstimatedCharges"> '+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Descripcion:</label> '+
+                            '<input class="form-control" type="text" value="AWS/Billing"> '+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Es:</label> '+
+                                    '<select class="form-control">'+
+                                        '<option value="1">></option>'+
+                                        '<option value="2">>=</option>'+
+                                        '<option value="3"><</option>'+
+                                        '<option value="4"><=</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>USD $:</label> '+
+                                    '<input class="form-control" type="text"> '+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Cuando esta alarma:</label> '+
+                            '<select class="form-control">'+
+                                '<option value="1">Estado de Alarma</option>'+
+                                '<option value="2">Estado Ok</option>'+
+                                '<option value="3">Estado Insuficiente</option>'+
+                            '</select>'+
+                        '</div>'+
+                        '<div class="text-right">'+
+                            '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                        '</div>'+
+                    '</div>'
+                );
+
+                $("#billing").append(
+                    '<div class="well col-md-4 init">'+
+                        '<br>'+
+                        '<div class="form-group">'+
+                            '<label>Nombre:</label> '+
+                            '<input class="form-control" type="text" value="EstimatedCharges"> '+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Descripcion:</label> '+
+                            '<input class="form-control" type="text" value="AWS/Billing"> '+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-md-6">'+
+                                    '<label>Es:</label> '+
+                                    '<select class="form-control">'+
+                                        '<option value="1">></option>'+
+                                        '<option value="2">>=</option>'+
+                                        '<option value="3"><</option>'+
+                                        '<option value="4"><=</option>'+
+                                    '</select>'+
+                                '</div>'+
+                                '<div class="col-md-6">'+
+                                    '<label>USD $:</label> '+
+                                    '<input class="form-control" type="text"> '+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<label>Cuando esta alarma:</label> '+
+                            '<select class="form-control">'+
+                                '<option value="1">Estado de Alarma</option>'+
+                                '<option value="2">Estado Ok</option>'+
+                                '<option value="3">Estado Insuficiente</option>'+
+                            '</select>'+
+                        '</div>'+
+                        '<div class="text-right">'+
+                            '<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>'+
+                        '</div>'+
+                    '</div>'
+                );
             }
         };
+
+        function showModal(context){
+            $('.contex-text').text(context);
+            $('#myModal').modal('show');
+        }
         
-        function newAlarm (data, prev) {
+        function newScheduler (data, prev) {
             var del = {
                 instanceID: prev.instanceID,
                 _hour: prev.hour + ':' + prev.min
@@ -443,16 +842,118 @@
                         data: params
                     }).done(function (data) {
                         if(data._code == 200) {
-                            alert("Alarmas configuradas");
+                            showModal('Tareas configuradas');
                             Instances.scheduler(prev.instanceID, prev.instanceName);
                         } else {
-                            alert(data._message);
+                            showModal(data._message);
                         }
                     });
                 } else {
-                    alert(data._message);
+                    showModal(data._message);
                 }
             });
+        }
+
+        function newAlarms (data, prev) {
+            var del = {
+                instanceID: prev.instanceID,
+                _hour: prev.hour + ':' + prev.min
+            }
+
+            uget({
+                type: 'DELETE',
+                url: LinkServer.Url('scheduler', 'delete'),
+                data: del
+            }).done(function (d) {
+                if(d._code == 200) {
+                    var params = {
+                        instanceID  : prev.instanceID,
+                        _hour       : data[0].value + ':' + data[1].value,
+                        _action     : data[2].value,
+                        days        : []
+                    };
+
+                    for(var i in data) {
+                        if(data[i].name == 'day') {
+                            params.days.push(data[i].value);
+                        }
+                    }
+
+                    uget({
+                        type: 'POST',
+                        url: LinkServer.Url('scheduler', 'add'),
+                        data: params
+                    }).done(function (data) {
+                        if(data._code == 200) {
+                            showModal('Tareas configuradas');
+                            Instances.scheduler(prev.instanceID, prev.instanceName);
+                        } else {
+                            showModal(data._message);
+                        }
+                    });
+                } else {
+                    showModal(data._message);
+                }
+            });
+        }
+
+        function modalConfirm (context, method) {
+            $('.modal-footer').html('<button data-dismiss="modal" type="button" class="btn btn-default">Cancel</button><button onclick="modalOk(\''+method+'\')" type="button" class="btn btn-primary">Ok</button>');
+            
+            showModal(context);
+        }
+
+        function modalOk(method){
+            console.log( method );
+            if(method == 'start'){
+                var form = $("#frm-instances");
+                var checks = parametrizer(form, true);
+                var instancesId = checks.instance.join('|');
+                uget({
+                    url: LinkServer.Url('instance', 'start', {
+                        instanceids: encodeURIComponent(instancesId)
+                    })
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        Instances.load();
+                    } else {
+                        showModal(data._message);
+                    }
+                });
+            }else if(method == 'stop'){
+                var form = $("#frm-instances");
+                var checks = parametrizer(form, true);
+                var instancesId = checks.instance.join('|');
+                uget({
+                    url: LinkServer.Url('instance', 'stop', {
+                        instanceids: encodeURIComponent(instancesId)
+                    })
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        Instances.load();
+                    } else {
+                        showModal(data._message);
+                    }
+                });
+            }else if(method == 'reboot'){
+                var form = $("#frm-instances");
+                var checks = parametrizer(form, true);
+                var instancesId = checks.instance.join('|');
+                uget({
+                    url: LinkServer.Url('instance', 'reboot', {
+                        instanceids: encodeURIComponent(instancesId)
+                    })
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        Instances.load();
+                    } else {
+                        showModal(data._message);
+                    }
+                });
+            }
+
+            $('#myModal').modal('hide');
+            $("#table-instances tbody input[type=checkbox]").prop('checked', false);
         }
         
         $(function () {
@@ -465,83 +966,84 @@
             });
             
             $("#checkAll").click(function () {
-                var sw = $(this).is(':checked');
-                console.log(sw);
-                $("#table-instances tbody input[type=checkbox]").prop('checked', sw);
+                $("#table-instances tbody input[type=checkbox]").prop('checked',$(this).is(':checked'));
             });
             
             $("#start").click(function (e) {
                 e.preventDefault();
-                
-                var start = confirm("Desea iniciar las instancias seleccionadas?");
-                
-                if(start) {
-                    var form = $("#frm-instances");
-                    var checks = parametrizer(form, true);
-                    var instancesId = checks.instance.join('|');
-                    uget({
-                        url: LinkServer.Url('instance', 'start', {
-                            instanceids: encodeURIComponent(instancesId)
-                        })
-                    }).done(function (data) {
-                        if(data._code === 200) {
-                            Instances.load();
-                        } else {
-                            alert(data._message);
-                        }
-                    });
-                }
+                modalConfirm("Desea iniciar las instancias seleccionadas?", "start");
             });
             
             $("#stop").click(function (e) {
                 e.preventDefault();
-                
-                var stop = confirm("Desea detener las instancias seleccionadas?");
-                
-                if(stop) {
-                    var form = $("#frm-instances");
-                    var checks = parametrizer(form, true);
-                    var instancesId = checks.instance.join('|');
-                    uget({
-                        url: LinkServer.Url('instance', 'stop', {
-                            instanceids: encodeURIComponent(instancesId)
-                        })
-                    }).done(function (data) {
-                        if(data._code === 200) {
-                            Instances.load();
-                        } else {
-                            alert(data._message);
-                        }
-                    });
-                }
+                modalConfirm("Desea detener las instancias seleccionadas?", "stop");
             });
             
             $("#reboot").click(function (e) {
                 e.preventDefault();
-                
-                var reboot = confirm("Desea reiniciar las instancias seleccionadas?");
-                
-                if(reboot) {
-                    var form = $("#frm-instances");
-                    var checks = parametrizer(form, true);
-                    var instancesId = checks.instance.join('|');
-                    uget({
-                        url: LinkServer.Url('instance', 'reboot', {
-                            instanceids: encodeURIComponent(instancesId)
-                        })
-                    }).done(function (data) {
-                        if(data._code === 200) {
-                            Instances.load();
-                        } else {
-                            alert(data._message);
-                        }
-                    });
-                }
+                modalConfirm("Desea reiniciar las instancias seleccionadas?", "stop");
             });
             
             Instances.refresh();
         });
+
+        function createNameAlarm(instance){
+            var str = "";
+            $( "#newMetricName option:selected" ).each(function() {
+                str += "awsec2-" + instance + "-" + $( this ).val();
+                console.log(str);
+            });
+            $( "#newNameAlarm" ).val( str );
+        }
         
+        function createAlarm (instance) {
+            if (confirm("Desea crear la alarma?") == true) {
+                var alarmSelect = $('#newSelectAlarm option:selected').val();
+                var a_ok = false;
+                var a_alarm = false;
+                var a_ins = false;
+                switch (alarmSelect) {
+                    case 'alarm':
+                        a_alarm = true;
+                        break;
+                    case 'ok':
+                        a_ok = true;
+                        break;
+                    case 'insufficient':
+                        a_ins = true;
+                        break;
+                }
+
+
+                var params = {
+                    AlarmName: $('#newNameAlarm').val(),
+                    OKActions: a_ok ? $('#newActionAlarm option:selected').val() : '',
+                    AlarmActions: a_alarm ? $('#newActionAlarm option:selected').val() : '',
+                    InsufficientDataActions: a_ins ? $('#newActionAlarm option:selected').val() : '',
+                    MetricName: $('#newMetricName option:selected').val(),
+                    Statistic: $('#newStatistic option:selected').val(),
+                    InstanceId: instance,
+                    Period: $('#newPeriod option:selected').val(),
+                    EvaluationPeriods: $('#newEvaluationPeriods').val(),
+                    Threshold: $('#newThreshold').val(),
+                    ComparisonOperator: $('#newComparisonOperator option:selected').val()
+                }
+
+                uget({
+                    url : LinkServer.Url('alarm', 'add'),
+                    type: 'POST',
+                    data: params
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        alert('Se ha creado la alarma satisfactoriamente.');
+                    }else{
+                        alert(data._response);
+                    }
+                });
+            }
+        }
+
+
         function logout () {
             uget({
                 url     : LinkServer.Url('user', 'logout')

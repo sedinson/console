@@ -1,0 +1,3 @@
+ip-public> 54.165.75.235
+instance-id> i-71be0f5c
+public dns> ec2-54-165-75-235.compute-1.amazonaws.com

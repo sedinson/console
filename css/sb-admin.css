@@ -376,6 +376,9 @@ th.headerSortUp {
 #scheduler-page {
     display: none;
 }
+#alarms-page {
+    display: none;
+}
 .floatining {
     position: relative;
     float: left;
@@ -384,4 +387,21 @@ th.headerSortUp {
 .floatining.newe button {
     background: #108701;
     color: #fff;
+}
+
+td.i_ip {
+    text-align: center;
+}
+
+#cpu > :first-child {
+    margin-left: 0px;
+}
+#cpu > div {
+    margin-left: 10px;
+}
+#billing > :first-child {
+    margin-left: 0px;
+}
+#billing > div {
+    margin-left: 10px;
 }
