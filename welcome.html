@@ -77,7 +77,8 @@
                             <!-- /input-group -->
                         </li>
                         <li>
-                            <a href="welcome.html"><i class="fa fa-dashboard fa-fw"></i> Instancias</a>
+                            <a href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
+                            <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
                     <!-- /#side-menu -->
@@ -158,14 +159,12 @@
                 </div>
             </div>
 
-            <div id="alarms-page">
+          <!--   <div id="alarms-page">
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">Alarmas Programadas</h1>
                     </div>
-                    <!-- /.col-lg-12 -->
                 </div>
-                <!-- /.row -->
                 
                 <div class="row">
                     <div class="col-lg-12" id="alarmsWork">
@@ -183,7 +182,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
         <!-- /#page-wrapper -->
 
@@ -854,49 +853,6 @@
             });
         }
 
-        function newAlarms (data, prev) {
-            var del = {
-                instanceID: prev.instanceID,
-                _hour: prev.hour + ':' + prev.min
-            }
-
-            uget({
-                type: 'DELETE',
-                url: LinkServer.Url('scheduler', 'delete'),
-                data: del
-            }).done(function (d) {
-                if(d._code == 200) {
-                    var params = {
-                        instanceID  : prev.instanceID,
-                        _hour       : data[0].value + ':' + data[1].value,
-                        _action     : data[2].value,
-                        days        : []
-                    };
-
-                    for(var i in data) {
-                        if(data[i].name == 'day') {
-                            params.days.push(data[i].value);
-                        }
-                    }
-
-                    uget({
-                        type: 'POST',
-                        url: LinkServer.Url('scheduler', 'add'),
-                        data: params
-                    }).done(function (data) {
-                        if(data._code == 200) {
-                            showModal('Tareas configuradas');
-                            Instances.scheduler(prev.instanceID, prev.instanceName);
-                        } else {
-                            showModal(data._message);
-                        }
-                    });
-                } else {
-                    showModal(data._message);
-                }
-            });
-        }
-
         function modalConfirm (context, method) {
             $('.modal-footer').html('<button data-dismiss="modal" type="button" class="btn btn-default">Cancel</button><button onclick="modalOk(\''+method+'\')" type="button" class="btn btn-primary">Ok</button>');
             
@@ -986,63 +942,6 @@
             
             Instances.refresh();
         });
-
-        function createNameAlarm(instance){
-            var str = "";
-            $( "#newMetricName option:selected" ).each(function() {
-                str += "awsec2-" + instance + "-" + $( this ).val();
-                console.log(str);
-            });
-            $( "#newNameAlarm" ).val( str );
-        }
-        
-        function createAlarm (instance) {
-            if (confirm("Desea crear la alarma?") == true) {
-                var alarmSelect = $('#newSelectAlarm option:selected').val();
-                var a_ok = false;
-                var a_alarm = false;
-                var a_ins = false;
-                switch (alarmSelect) {
-                    case 'alarm':
-                        a_alarm = true;
-                        break;
-                    case 'ok':
-                        a_ok = true;
-                        break;
-                    case 'insufficient':
-                        a_ins = true;
-                        break;
-                }
-
-
-                var params = {
-                    AlarmName: $('#newNameAlarm').val(),
-                    OKActions: a_ok ? $('#newActionAlarm option:selected').val() : '',
-                    AlarmActions: a_alarm ? $('#newActionAlarm option:selected').val() : '',
-                    InsufficientDataActions: a_ins ? $('#newActionAlarm option:selected').val() : '',
-                    MetricName: $('#newMetricName option:selected').val(),
-                    Statistic: $('#newStatistic option:selected').val(),
-                    InstanceId: instance,
-                    Period: $('#newPeriod option:selected').val(),
-                    EvaluationPeriods: $('#newEvaluationPeriods').val(),
-                    Threshold: $('#newThreshold').val(),
-                    ComparisonOperator: $('#newComparisonOperator option:selected').val()
-                }
-
-                uget({
-                    url : LinkServer.Url('alarm', 'add'),
-                    type: 'POST',
-                    data: params
-                }).done(function (data) {
-                    if(data._code === 200) {
-                        alert('Se ha creado la alarma satisfactoriamente.');
-                    }else{
-                        alert(data._response);
-                    }
-                });
-            }
-        }
-
 
         function logout () {
             uget({

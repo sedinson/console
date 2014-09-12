@@ -376,9 +376,7 @@ th.headerSortUp {
 #scheduler-page {
     display: none;
 }
-#alarms-page {
-    display: none;
-}
+
 .floatining {
     position: relative;
     float: left;
@@ -393,12 +391,6 @@ td.i_ip {
     text-align: center;
 }
 
-#cpu > :first-child {
-    margin-left: 0px;
-}
-#cpu > div {
-    margin-left: 10px;
-}
 #billing > :first-child {
     margin-left: 0px;
 }
