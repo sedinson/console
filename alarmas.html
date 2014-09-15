@@ -77,7 +77,8 @@
                             <!-- /input-group -->
                         </li>
                         <li>
-                            <a href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
+                            <a href="dashboard.html"><i class="glyphicon glyphicon-dashboard"></i> Dashboard</a>
+                            <a href="welcome.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Instancias</a>
                             <a class="active" href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
@@ -544,7 +545,7 @@
                                                 '<div class="row">'+
                                                     '<div class="col-md-6">'+
                                                         '<label>Realice la acción:</label>'+
-                                                        '<fieldset>'+
+                                                        '<fieldset id="changeCombox">'+
                                                             '<select id="'+ i +'ActionAlarm" class="form-control">';
 
                                         switch(data._response[i]['OKActions'][0]){
@@ -609,17 +610,17 @@
                                                         '<select id="'+ i +'SelectAlarm" class="form-control">';
 
                                         if(data._response[i]['OKActions'][0] != null){
-                                            html += '<option value="1">Estado de Alarma</option>'+
-                                                    '<option selected value="2">Estado Ok</option>'+
-                                                    '<option value="3">Estado Insuficiente</option>';
+                                            html += '<option value="ALARM">Estado de Alarma</option>'+
+                                                    '<option selected value="OK">Estado Ok</option>'+
+                                                    '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
                                         }else if(data._response[i]['AlarmActions'][0] != null){
-                                            html += '<option selected value="1">Estado de Alarma</option>'+
-                                                    '<option value="2">Estado Ok</option>'+
-                                                    '<option value="3">Estado Insuficiente</option>';
+                                            html += '<option selected value="ALARM">Estado de Alarma</option>'+
+                                                    '<option value="OK">Estado Ok</option>'+
+                                                    '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
                                         }else if(data._response[i]['AlarmActions'][0] != null){
-                                            html += '<option value="1">Estado de Alarma</option>'+
-                                                    '<option value="2">Estado Ok</option>'+
-                                                    '<option value="3">Estado Insuficiente</option>';
+                                            html += '<option value="ALARM">Estado de Alarma</option>'+
+                                                    '<option value="OK">Estado Ok</option>'+
+                                                    '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
                                         }
 
                                         html +=        '</select>'+
@@ -627,14 +628,18 @@
                                                 '</div>'+
                                             '</div>'+
                                             '<div class="form-group">'+
-                                                '<label>Instancia:</label> ' + data._response[i]['Dimensions'][0].Value;
-                                                '<input type="hidden" id="'+ i +'listInstances" value="'+ data._response[i]['Dimensions'][0].Value +'">';
+                                                '<label>Instancia:</label> ' + data._response[i]['Dimensions'][0].Value +
+                                                '<input type="hidden" id="'+ i +'Instances" value="' + data._response[i]['Dimensions'][0].Value + '">';
 
                                         /*for (var j = 0; j < TempInstances.length; j++){
                                             console.log(TempInstances[j].InstanceId);
                                         }*/
 
                                         html += '</div>'+
+                                            '<div class="form-group">'+
+                                                '<label>Nombre de Alarma:</label>'+
+                                                '<input id="'+ i +'NameAlarm" class="form-control" type="text" value="' + data._response[i]['AlarmName'] + '"><hr>'+
+                                            '</div>'+
                                             '<div class="text-right">'+
                                                 '<div class="row">'+
                                                     '<div class="col-md-6 text-center">';
@@ -874,7 +879,7 @@
             );
             
             Alarms.refresh();
-            //Instances.load();
+            // Instances.load();
         });
 
 
@@ -923,51 +928,61 @@
                 type: 'POST',
                 data: post
             }).done(function (data) {
-                $('#newThreshold').val('');
-                $('#newAlarmModal').modal('hide');
-                Alarms.refresh();
+                if(data._code === 200) {
+                    $('#newThreshold').val('');
+                    $('#newAlarmModal').modal('hide');
+                    Alarms.refresh();
+                    showModal('La alarma fue creada con exito');
+                }else{
+                    showModal('La alarma no fue creada.');
+                }
             });
         }
 
         function editAlarm(iterator){
-            var op = $('#'+iterator+'SelectAlarm option:selected').val();
+            var op = $('#'+ iterator +'SelectAlarm option:selected').val();
+            console.log($('#'+ iterator +'SelectAlarm option:selected').val());
+
             var ok = "";
             var alarm = "";
             var ins = "";
 
             switch(op){
                 case "ALARM":
-                    alarm = $('#'+iterator+'ActionAlarm option:selected').val();
+                    alarm = $('#'+ iterator +'ActionAlarm option:selected').val();
                     break;
                 case "OK":
-                    ok = $('#'+iterator+'ActionAlarm option:selected').val();
+                    ok = $('#'+ iterator +'ActionAlarm option:selected').val();
                     break;
                 case "INSUFFICIENT_DATA":
-                    ins = $('#'+iterator+'ActionAlarm option:selected').val();
+                    ins = $('#'+ iterator +'ActionAlarm option:selected').val();
                     break;
             }
 
             var post = {
-                'AlarmName': $('#'+iterator+'NameAlarm').val(),
+                'AlarmName': $('#'+ iterator +'NameAlarm').val(),
                 'OKActions': ok,
                 'AlarmActions': alarm,
                 'InsufficientDataActions': ins,
-                'MetricName': $('#'+iterator+'MetricName option:selected').val(),
-                'Statistic': $('#'+iterator+'Statistic option:selected').val(),
-                'InstanceId': $('#'+iterator+'listInstances').val(),
-                'Period': $('#'+iterator+'Period option:selected').val(),
-                'EvaluationPeriods': $('#'+iterator+'EvaluationPeriods').val(),
-                'Threshold': $('#'+iterator+'Threshold').val(),
-                'ComparisonOperator': $('#'+iterator+'ComparisonOperator option:selected').val()
+                'MetricName': $('#'+ iterator +'MetricName option:selected').val(),
+                'Statistic': $('#'+ iterator +'Statistic option:selected').val(),
+                'InstanceId': $('#'+ iterator +'Instances').val(),
+                'Period': $('#'+ iterator +'Period option:selected').val(),
+                'EvaluationPeriods': $('#'+ iterator +'EvaluationPeriods').val(),
+                'Threshold': $('#'+ iterator +'Threshold').val(),
+                'ComparisonOperator': $('#'+ iterator +'ComparisonOperator option:selected').val()
             }
 
             uget({
-                url : LinkServer.Url('alarm', 'add2'),
+                url : LinkServer.Url('alarm', 'add'),
                 type: 'POST',
                 data: post
             }).done(function (data) {
-                alert('ok r');
-                //Alarms.refresh();
+                if(data._code === 200) {
+                    showModal('La alarma fue editada con exito');
+                }else{
+                    showModal('La alarma no editada.');
+                }
             });
         }
 

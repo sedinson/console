@@ -77,7 +77,8 @@
                             <!-- /input-group -->
                         </li>
                         <li>
-                            <a class="active" href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
+                            <a href="dashboard.html"><i class="glyphicon glyphicon-dashboard"></i> Dashboard</a>
+                            <a class="active" href="welcome.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Instancias</a>
                             <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
@@ -92,7 +93,15 @@
             <div id="instances-page">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Instancias</h1>
+                        <h1 class="page-header">Instancias
+                            <div class="panel-buttons">
+                                <div class="btn-group">
+                                    <button type="button" id="start" class="btn btn-success">Iniciar</button>
+                                    <button type="button" id="stop" class="btn btn-danger">Detener</button>
+                                    <button type="button" id="reboot" class="btn btn-warning">Reiniciar</button>
+                                </div>
+                            </div>
+                        </h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -104,14 +113,6 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     Todas mis instancias
-
-                                    <div class="panel-buttons">
-                                        <div class="btn-group">
-                                            <button type="button" id="start" class="btn btn-success">Iniciar</button>
-                                            <button type="button" id="stop" class="btn btn-danger">Detener</button>
-                                            <button type="button" id="reboot" class="btn btn-warning">Reiniciar</button>
-                                        </div>
-                                    </div>
                                 </div>
                                 <!-- /.panel-heading -->
                                 <div class="panel-body">
