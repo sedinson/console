@@ -932,7 +932,6 @@
                         break;
                 }
 
-
                 var params = {
                     AlarmName: $('#newNameAlarm').val(),
                     OKActions: a_ok ? $('#newActionAlarm option:selected').val() : '',
@@ -954,6 +953,7 @@
                 }).done(function (data) {
                     if(data._code === 200) {
                         alert('Se ha creado la alarma satisfactoriamente.');
+                        Alarms.refresh();
                     }else{
                         alert(data._response);
                     }

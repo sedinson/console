@@ -78,7 +78,7 @@
                         </li>
                         <li>
                             <a href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
-                            <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
+                            <a class="active" href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
                     <!-- /#side-menu -->
@@ -156,6 +156,113 @@
         </div>
     </div>
 
+    <div id="newAlarmModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="mySmallModalLabel">Console - Soluntech</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Siempre que sea: </label>
+                                <select id="newStatistic" class="form-control">
+                                    <option value="Average">Promedio</option>
+                                    <option value="Minimum">Minimo</option>
+                                    <option value="Maximum">Maximo</option>
+                                    <option value="Sum">Total</option>
+                                    <option value="SampleCount">SampleCount</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>De:</label>
+                                <select id="newMetricName" onchange="createNameAlarm()" class="form-control">
+                                    <option value="CPUUtilization">Consumo de CPU</option>
+                                    <option value="NetworkOut">Red sin Servicio</option>
+                                    <option value="DiskReadBytes">Lectura Disco</option>
+                                    <option value="DiskReadOps">Operaciones Lectura Disco</option>
+                                    <option value="DiskWriteBytes">Operaciones Escritura Disco</option>
+                                    <option value="NetworkIn">Red en Servicio</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Es:</label>
+                                <select id="newComparisonOperator" class="form-control">
+                                    <option value="GreaterThanThreshold">></option>
+                                    <option value="GreaterThanOrEqualToThreshold">>=</option>
+                                    <option value="LessThanThreshold"><</option>
+                                    <option value="LessThanOrEqualToThreshold"><=</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label id="changeLabelForm">Porcentaje:</label>
+                                <input autofocus id="newThreshold" class="form-control" type="text">
+                            </div>
+                        </div>  
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Por lo menos:</label>
+                                <input id="newEvaluationPeriods" class="form-control" type="text" value="1">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Período(s) de</label>
+                                <select id="newPeriod" class="form-control">
+                                    <option value="300">5 Minutos</option>
+                                    <option value="900">15 Minutos</option>
+                                    <option value="3600">1 Hora</option>
+                                    <option value="21600">6 Hora</option>
+                                    <option value="86400">1 Dia</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Realice la acción:</label>
+                                <fieldset id="changeCombox">
+                                    <select id="newActionAlarm" class="form-control">
+                                        <option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>
+                                        <option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>
+                                        <option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Cuando esta alarma:</label>
+                                <select id="newSelectAlarm" class="form-control">
+                                    <option value="ALARM">Estado de Alarma</option>
+                                    <option value="OK">Estado Ok</option>
+                                    <option value="INSUFFICIENT_DATA">Estado Insuficiente</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Instancia:</label>
+                        <select id="listInstances" class="form-control" onchange="createNameAlarm()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de Alarma:</label>
+                        <input id="newNameAlarm" class="form-control" type="text" value="awsec2--CPUUtilization">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button onclick="createAlarm()" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Scripts - Include with every page -->
     <script src="js/jquery-1.10.2.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -192,544 +299,466 @@
                         billing.append('<br>');
                         var html = "";
 
-                        for (var i = 0; i <= data._response.length; i++){
-                            if(data._response[i]['Namespace'] == 'AWS/EC2'){
+                        var TempInstances
 
-                                var tempButton = "";
+                        uget({
+                            url: LinkServer.Url('account', 'instances')
+                        }).done(function (data2) {
+                            if(data2._code === 200) {
+                                console.log('ok Servicio');
+                                TempInstances = data._response;
 
-                                switch(data._response[i]['StateValue']){
-                                    case "OK":
-                                        tempButton += '<div class="alert alert-success" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
-                                        break;
-                                    case "ALARM":
-                                        tempButton += '<div class="alert alert-danger" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
-                                        break;
-                                    case "INSUFFICIENT_DATA":
-                                        tempButton += '<div class="alert alert-warning" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
-                                        break;
-                                }
+                                for (var i = 0; i <= data._response.length; i++){
+                                    if(data._response[i].Namespace == 'AWS/EC2'){
 
-                                html = '<div class="panel-heading">'+
-                                            '<h4 class="panel-title">'+
-                                                tempButton +
-                                                '<a data-toggle="collapse" data-parent="#accordion" href="#collapse'+ i +'">'+
-                                                    data._response[i]['AlarmName'] +
-                                                '</a>'+
-                                            '</h4>' +
-                                        '</div>'+
-                                        '<div id="collapse'+ i +'" class="panel-collapse collapse">'+
-                                            '<div class="panel-body">';
+                                        var tempButton = "";
 
-                                html += '<div class="well col-md-6 init">'+
-                                    '<button type="button" class="close" onclick="AlarmDelete(\''+ data._response[i]['AlarmName'] +'\')"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
-                                    '<div class="form-group">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Siempre que sea: </label>'+
-                                                '<select class="form-control">';
+                                        switch(data._response[i].StateValue){
+                                            case "OK":
+                                                tempButton += '<div class="alert alert-success" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
+                                                break;
+                                            case "ALARM":
+                                                tempButton += '<div class="alert alert-danger" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
+                                                break;
+                                            case "INSUFFICIENT_DATA":
+                                                tempButton += '<div class="alert alert-warning" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
+                                                break;
+                                        }
 
-                                switch(data._response[i]['Statistic']){
-                                    case "Average":
-                                        html += '<option selected value="Average">Promedio</option>'+
-                                                '<option value="Minimum">Minimo</option>'+
-                                                '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
-                                        break;
-                                    case "Minimum":
-                                        html += '<option value="Average">Promedio</option>'+
-                                                '<option selected value="Minimum">Minimo</option>'+
-                                                '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
-                                        break;
-                                    case "Maximum":
-                                        html += '<option value="Average">Promedio</option>'+
-                                                '<option value="Minimum">Minimo</option>'+
-                                                '<option selected value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
-                                        break;
-                                    case "Sum":
-                                        html += '<option value="Average">Promedio</option>'+
-                                                '<option value="Minimum">Minimo</option>'+
-                                                '<option value="Maximum">Maximo</option>'+
-                                                '<option selected value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
-                                        break;
-                                    case "SampleCount":
-                                        html += '<option value="Average">Promedio</option>'+
-                                                '<option value="Minimum">Minimo</option>'+
-                                                '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option selected value="SampleCount">SampleCount</option>';
-                                        break;
-                                }
-                                                    
-                                html +=         '</select>'+
-                                            '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<label>De:</label>'+
-                                                '<select class="form-control">';
+                                        html = '<div class="panel-heading">'+
+                                                    '<h4 class="panel-title">'+
+                                                        tempButton +
+                                                        '<a data-toggle="collapse" data-parent="#accordion" href="#collapse'+ i +'">'+
+                                                            data._response[i].AlarmName +
+                                                        '</a>'+
+                                                    '</h4>' +
+                                                '</div>'+
+                                                '<div id="collapse'+ i +'" class="panel-collapse collapse">'+
+                                                    '<div class="panel-body">';
 
-                                switch(data._response[i]['MetricName']){
-                                    case "CPUUtilization":
-                                        html += '<option selected value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    case "NetworkOut":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option selected value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    case "DiskReadBytes":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option selected value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    case "DiskReadOps":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option selected value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    case "DiskWriteBytes":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option selected value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    case "NetworkIn":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                    '<option value="NetworkOut">Red sin Servicio</option>'+
-                                                    '<option value="DiskReadBytes">Lectura Disco</option>'+
-                                                    '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                    '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                                                    '<option selected value="NetworkIn">Red en Servicio</option>';
-                                        break;
-                                    default :
-                                        html += '<option value="0">No estimado</option>';
-                                }
+                                        html += '<div class="well col-md-6 init">'+
+                                            '<button type="button" class="close" onclick="AlarmDelete(\''+ data._response[i].AlarmName +'\')"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
+                                            '<div class="form-group">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Siempre que sea: </label>'+
+                                                        '<select id="'+ i +'Statistic" class="form-control">';
+
+                                        switch(data._response[i]['Statistic']){
+                                            case "Average":
+                                                html += '<option selected value="Average">Promedio</option>'+
+                                                        '<option value="Minimum">Minimo</option>'+
+                                                        '<option value="Maximum">Maximo</option>'+
+                                                        '<option value="Sum">Total</option>'+
+                                                        '<option value="SampleCount">SampleCount</option>';
+                                                break;
+                                            case "Minimum":
+                                                html += '<option value="Average">Promedio</option>'+
+                                                        '<option selected value="Minimum">Minimo</option>'+
+                                                        '<option value="Maximum">Maximo</option>'+
+                                                        '<option value="Sum">Total</option>'+
+                                                        '<option value="SampleCount">SampleCount</option>';
+                                                break;
+                                            case "Maximum":
+                                                html += '<option value="Average">Promedio</option>'+
+                                                        '<option value="Minimum">Minimo</option>'+
+                                                        '<option selected value="Maximum">Maximo</option>'+
+                                                        '<option value="Sum">Total</option>'+
+                                                        '<option value="SampleCount">SampleCount</option>';
+                                                break;
+                                            case "Sum":
+                                                html += '<option value="Average">Promedio</option>'+
+                                                        '<option value="Minimum">Minimo</option>'+
+                                                        '<option value="Maximum">Maximo</option>'+
+                                                        '<option selected value="Sum">Total</option>'+
+                                                        '<option value="SampleCount">SampleCount</option>';
+                                                break;
+                                            case "SampleCount":
+                                                html += '<option value="Average">Promedio</option>'+
+                                                        '<option value="Minimum">Minimo</option>'+
+                                                        '<option value="Maximum">Maximo</option>'+
+                                                        '<option value="Sum">Total</option>'+
+                                                        '<option selected value="SampleCount">SampleCount</option>';
+                                                break;
+                                        }
+                                                           
+                                        html +=         '</select>'+
+                                                    '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>De:</label>'+
+                                                        '<select id="'+ i +'MetricName" class="form-control">';
+
+                                        switch(data._response[i]['MetricName']){
+                                            case "CPUUtilization":
+                                                html += '<option selected value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            case "NetworkOut":
+                                                html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option selected value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            case "DiskReadBytes":
+                                                html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option selected value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            case "DiskReadOps":
+                                                html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option selected value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            case "DiskWriteBytes":
+                                                html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option selected value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            case "NetworkIn":
+                                                html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                                        '<option value="NetworkOut">Red sin Servicio</option>'+
+                                                        '<option value="DiskReadBytes">Lectura Disco</option>'+
+                                                        '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                                        '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
+                                                        '<option selected value="NetworkIn">Red en Servicio</option>';
+                                                break;
+                                            default :
+                                                html += '<option value="0">No estimado</option>';
+                                        }
 
 
-                                html +=         '</select>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '<div class="form-group">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Es:</label>'+
-                                                '<select class="form-control">';
-
-                                switch(data._response[i]['ComparisonOperator']){
-                                    case "GreaterThanThreshold":
-                                        html += '<option selected value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "GreaterThanOrEqualToThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option selected value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "LessThanThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option selected value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "LessThanOrEqualToThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option selected value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                }
-
-                                html +=         '</select>'+
-                                            '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Porcentaje:</label>'+
-                                                '<input class="form-control" type="text" value="'+ data._response[i]['Threshold'].substring(0,data._response[i]['Threshold'].length-2) +'">'+
-                                            '</div>'+
-                                        '</div>'+  
-                                    '</div>'+
-                                    '<div class="form-group">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Por lo menos:</label><br>'+
-                                                '<input class="form-control" type="text" value="'+ data._response[i]['EvaluationPeriods'] +'">'+
-                                            '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Período(s) de</label>'+
-                                                '<select class="form-control">';
-
-                                switch(data._response[i]['Period']){
-                                    case "60":
-                                        html += '<option selected value="60">1 Minuto</option>'+
-                                                '<option value="300">5 Minutos</option>'+
-                                                '<option value="900">15 Minutos</option>'+
-                                                '<option value="3600">1 Hora</option>'+
-                                                '<option value="21600">6 Hora</option>'+
-                                                '<option value="86400">1 Dia</option>';
-                                        break;
-                                    case '300':
-                                        html += '<option value="60">1 Minuto</option>'+
-                                                '<option selected value="300">5 Minutos</option>'+
-                                                '<option value="900">15 Minutos</option>'+
-                                                '<option value="3600">1 Hora</option>'+
-                                                '<option value="21600">6 Hora</option>'+
-                                                '<option value="86400">1 Dia</option>';
-                                        break;
-                                    case "900":
-                                        html += '<option value="60">1 Minuto</option>'+
-                                                '<option value="300">5 Minutos</option>'+
-                                                '<option selected value="900">15 Minutos</option>'+
-                                                '<option value="3600">1 Hora</option>'+
-                                                '<option value="21600">6 Hora</option>'+
-                                                '<option value="86400">1 Dia</option>';
-                                        break;
-                                    case "3600":
-                                        html += '<option value="60">1 Minuto</option>'+
-                                                '<option value="300">5 Minutos</option>'+
-                                                '<option value="900">15 Minutos</option>'+
-                                                '<option selected value="3600">1 Hora</option>'+
-                                                '<option value="21600">6 Hora</option>'+
-                                                '<option value="86400">1 Dia</option>';
-                                        break;
-                                    case "21600":
-                                        html += '<option value="60">1 Minuto</option>'+
-                                                '<option value="300">5 Minutos</option>'+
-                                                '<option value="900">15 Minutos</option>'+
-                                                '<option value="3600">1 Hora</option>'+
-                                                '<option selected value="21600">6 Hora</option>'+
-                                                '<option value="86400">1 Dia</option>';
-                                        break;
-                                    case "86400":
-                                        html += '<option value="60">1 Minuto</option>'+
-                                                '<option value="300">5 Minutos</option>'+
-                                                '<option value="900">15 Minutos</option>'+
-                                                '<option value="3600">1 Hora</option>'+
-                                                '<option value="21600">6 Hora</option>'+
-                                                '<option selected value="86400">1 Dia</option>';
-                                        break;
-                                }
-
-                                html +=         '</select>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '<div class="form-group">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6">'+
-                                                // '<input id="showComboxCpu" type="checkbox"> '+
-                                                '<label>Realice la acción:</label>'+
-                                                '<fieldset id="changeCombox">'+
-                                                    '<select id="disabledSelect" class="form-control">';
-
-                                switch(data._response[i]['OKActions'][0]){
-                                    case "arn:aws:automate:us-east-1:ec2:stop":
-                                        html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:automate:us-east-1:ec2:terminate":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                }
-
-                                switch(data._response[i]['AlarmActions'][0]){
-                                    case "arn:aws:automate:us-east-1:ec2:stop":
-                                        html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:automate:us-east-1:ec2:terminate":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                }
-
-                                switch(data._response[i]['InsufficientDataActions'][0]){
-                                    case "arn:aws:automate:us-east-1:ec2:stop":
-                                        html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:automate:us-east-1:ec2:terminate":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                    case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
-                                        html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
-                                        break;
-                                }
-                                                        
-                                html +=             '</select>'+
-                                                '</fieldset>'+
-                                            '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Cuando esta alarma:</label>'+
-                                                '<select class="form-control">';
-
-                                if(data._response[i]['OKActions'][0] != null){
-                                    html += '<option value="1">Estado de Alarma</option>'+
-                                            '<option selected value="2">Estado Ok</option>'+
-                                            '<option value="3">Estado Insuficiente</option>';
-                                }else if(data._response[i]['AlarmActions'][0] != null){
-                                    html += '<option selected value="1">Estado de Alarma</option>'+
-                                            '<option value="2">Estado Ok</option>'+
-                                            '<option value="3">Estado Insuficiente</option>';
-                                }else if(data._response[i]['AlarmActions'][0] != null){
-                                    html += '<option value="1">Estado de Alarma</option>'+
-                                            '<option value="2">Estado Ok</option>'+
-                                            '<option value="3">Estado Insuficiente</option>';
-                                }
-
-                                html +=        '</select>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '<div class="form-group">'+
-                                        '<label>Nombre de Alarma:</label>'+
-                                        '<input class="form-control" type="text" value="'+data._response[i]['AlarmName']+'"><hr>'+
-                                    '</div>'+
-                                    '<div class="text-right">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6 text-center">';
-                            
-                                switch(data._response[i]['StateValue']){
-                                    case "OK":
-                                        html += '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
-                                        break;
-                                    case "ALARM":
-                                        html += '<div class="alert alert-danger" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
-                                        break;
-                                    case "INSUFFICIENT_DATA":
-                                        html += '<div class="alert alert-warning" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
-                                        break;
-                                } 
-
-                                html +=         '</div>'+
-                                                '<div class="col-md-6">'+
-                                                    '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                                        html +=         '</select>'+
+                                                    '</div>'+
                                                 '</div>'+
                                             '</div>'+
-                                        '</div>'+
-                                    '</div>';
+                                            '<div class="form-group">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Es:</label>'+
+                                                        '<select id="'+ i +'ComparisonOperator" class="form-control">';
 
-                                // html += '<div class="well col-md-5 col-md-offset-1"><h4>Historial</h4><div id="history'+ i +'"></div></div>'
-                                html += "</div></div>";
+                                        switch(data._response[i]['ComparisonOperator']){
+                                            case "GreaterThanThreshold":
+                                                html += '<option selected value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "GreaterThanOrEqualToThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option selected value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "LessThanThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option selected value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "LessThanOrEqualToThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option selected value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                        }
 
-                                cpu.append(html);
-                                html = "";
+                                        html +=         '</select>'+
+                                                    '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Porcentaje:</label>'+
+                                                        '<input id="'+ i +'Threshold" class="form-control" type="text" value="'+ data._response[i]['Threshold'].substring(0,data._response[i]['Threshold'].length-2) +'">'+
+                                                    '</div>'+
+                                                '</div>'+  
+                                            '</div>'+
+                                            '<div class="form-group">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Por lo menos:</label><br>'+
+                                                        '<input id="'+ i +'EvaluationPeriods" class="form-control" type="text" value="'+ data._response[i]['EvaluationPeriods'] +'">'+
+                                                    '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Período(s) de</label>'+
+                                                        '<select id="'+ i +'Period" class="form-control">';
 
-                            }else if(data._response[i]['Namespace'] == 'AWS/Billing'){
-                                html = '<div class="well col-md-4 init">'+
-                                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
-                                        '<div class="form-group">'+
-                                            '<label>Nombre:</label> '+
-                                            '<input class="form-control" type="text" value="'+ data._response[i]['AlarmName'] +'"> '+
-                                        '</div>'+
-                                        '<div class="form-group">'+
-                                            '<label>Descripcion:</label> '+
-                                            '<input class="form-control" type="text" value="'+data._response[i]['AlarmDescription']+'"> '+
-                                        '</div>'+
-                                        '<div class="form-group">'+
-                                            '<div class="row">'+
-                                                '<div class="col-md-6">'+
-                                                    '<label>Es:</label> '+
-                                                    '<select class="form-control">';
-                                switch(data._response[i]['ComparisonOperator']){
-                                    case "GreaterThanThreshold":
-                                        html += '<option selected value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "GreaterThanOrEqualToThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option selected value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "LessThanThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option selected value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                    case "LessThanOrEqualToThreshold":
-                                        html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option selected value="LessThanOrEqualToThreshold"><=</option>';
-                                        break;
-                                }
-                                
-                                html +=             '</select>'+
-                                                '</div>'+
-                                                '<div class="col-md-6">'+
-                                                    '<label>USD $:</label> '+
-                                                    '<input class="form-control" type="text" value="'+ data._response[i]['Threshold'].substring(0,data._response[i]['Threshold'].length-2) +'"> '+
+                                        switch(data._response[i]['Period']){
+                                            case "60":
+                                                html += '<option selected value="60">1 Minuto</option>'+
+                                                        '<option value="300">5 Minutos</option>'+
+                                                        '<option value="900">15 Minutos</option>'+
+                                                        '<option value="3600">1 Hora</option>'+
+                                                        '<option value="21600">6 Hora</option>'+
+                                                        '<option value="86400">1 Dia</option>';
+                                                break;
+                                            case '300':
+                                                html += '<option value="60">1 Minuto</option>'+
+                                                        '<option selected value="300">5 Minutos</option>'+
+                                                        '<option value="900">15 Minutos</option>'+
+                                                        '<option value="3600">1 Hora</option>'+
+                                                        '<option value="21600">6 Hora</option>'+
+                                                        '<option value="86400">1 Dia</option>';
+                                                break;
+                                            case "900":
+                                                html += '<option value="60">1 Minuto</option>'+
+                                                        '<option value="300">5 Minutos</option>'+
+                                                        '<option selected value="900">15 Minutos</option>'+
+                                                        '<option value="3600">1 Hora</option>'+
+                                                        '<option value="21600">6 Hora</option>'+
+                                                        '<option value="86400">1 Dia</option>';
+                                                break;
+                                            case "3600":
+                                                html += '<option value="60">1 Minuto</option>'+
+                                                        '<option value="300">5 Minutos</option>'+
+                                                        '<option value="900">15 Minutos</option>'+
+                                                        '<option selected value="3600">1 Hora</option>'+
+                                                        '<option value="21600">6 Hora</option>'+
+                                                        '<option value="86400">1 Dia</option>';
+                                                break;
+                                            case "21600":
+                                                html += '<option value="60">1 Minuto</option>'+
+                                                        '<option value="300">5 Minutos</option>'+
+                                                        '<option value="900">15 Minutos</option>'+
+                                                        '<option value="3600">1 Hora</option>'+
+                                                        '<option selected value="21600">6 Hora</option>'+
+                                                        '<option value="86400">1 Dia</option>';
+                                                break;
+                                            case "86400":
+                                                html += '<option value="60">1 Minuto</option>'+
+                                                        '<option value="300">5 Minutos</option>'+
+                                                        '<option value="900">15 Minutos</option>'+
+                                                        '<option value="3600">1 Hora</option>'+
+                                                        '<option value="21600">6 Hora</option>'+
+                                                        '<option selected value="86400">1 Dia</option>';
+                                                break;
+                                        }
+
+                                        html +=         '</select>'+
+                                                    '</div>'+
                                                 '</div>'+
                                             '</div>'+
-                                        '</div>'+
-                                        '<div class="form-group">'+
-                                        '<div class="row">'+
-                                            '<div class="col-md-6">'+
-                                                // '<input id="showComboxCpu" type="checkbox"> '+
-                                                '<label>Realice la acción:</label>'+
-                                                '<fieldset id="changeCombox">'+
-                                                    '<select id="disabledSelect" class="form-control">'+
-                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>'+
-                                                    '</select>'+
-                                                '</fieldset>'+
-                                            '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<label>Cuando esta alarma:</label>'+
-                                                '<select class="form-control">'+
-                                                    '<option value="1">Estado de Alarma</option>'+
+                                            '<div class="form-group">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Realice la acción:</label>'+
+                                                        '<fieldset>'+
+                                                            '<select id="'+ i +'ActionAlarm" class="form-control">';
+
+                                        switch(data._response[i]['OKActions'][0]){
+                                            case "arn:aws:automate:us-east-1:ec2:stop":
+                                                html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:automate:us-east-1:ec2:terminate":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                        }
+
+                                        switch(data._response[i]['AlarmActions'][0]){
+                                            case "arn:aws:automate:us-east-1:ec2:stop":
+                                                html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:automate:us-east-1:ec2:terminate":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                        }
+
+                                        switch(data._response[i]['InsufficientDataActions'][0]){
+                                            case "arn:aws:automate:us-east-1:ec2:stop":
+                                                html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:automate:us-east-1:ec2:terminate":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                            case "arn:aws:sns:us-east-1:482407636571:NotifyMe":
+                                                html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                                        '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                                        '<option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>';
+                                                break;
+                                        }
+                                                               
+                                        html +=             '</select>'+
+                                                        '</fieldset>'+
+                                                    '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Cuando esta alarma:</label>'+
+                                                        '<select id="'+ i +'SelectAlarm" class="form-control">';
+
+                                        if(data._response[i]['OKActions'][0] != null){
+                                            html += '<option value="1">Estado de Alarma</option>'+
+                                                    '<option selected value="2">Estado Ok</option>'+
+                                                    '<option value="3">Estado Insuficiente</option>';
+                                        }else if(data._response[i]['AlarmActions'][0] != null){
+                                            html += '<option selected value="1">Estado de Alarma</option>'+
                                                     '<option value="2">Estado Ok</option>'+
-                                                    '<option value="3">Estado Insuficiente</option>'+
-                                                '</select>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                        '<div class="text-right">'+
-                                            '<div class="row">'+
-                                                '<div class="col-md-6 text-center">';
+                                                    '<option value="3">Estado Insuficiente</option>';
+                                        }else if(data._response[i]['AlarmActions'][0] != null){
+                                            html += '<option value="1">Estado de Alarma</option>'+
+                                                    '<option value="2">Estado Ok</option>'+
+                                                    '<option value="3">Estado Insuficiente</option>';
+                                        }
 
-                                                switch(data._response[i]['StateValue']){
-                                                    case "OK":
-                                                        html += '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
-                                                        break;
-                                                    case "ALARM":
-                                                        html += '<div class="alert alert-danger" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
-                                                        break;
-                                                    case "INSUFFICIENT_DATA":
-                                                        html += '<div class="alert alert-warning" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
-                                                        break;
-                                                }
-                                html +=         '</div>'+
-                                            '<div class="col-md-6">'+
-                                                '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                                        html +=        '</select>'+
+                                                    '</div>'+
+                                                '</div>'+
                                             '</div>'+
-                                        '</div>'+
-                                    '</div>';
+                                            '<div class="form-group">'+
+                                                '<label>Instancia:</label> ' + data._response[i]['Dimensions'][0].Value;
+                                                '<input type="hidden" id="'+ i +'listInstances" value="'+ data._response[i]['Dimensions'][0].Value +'">';
 
-                                billing.append(html);
-                                html = "";
+                                        /*for (var j = 0; j < TempInstances.length; j++){
+                                            console.log(TempInstances[j].InstanceId);
+                                        }*/
+
+                                        html += '</div>'+
+                                            '<div class="text-right">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6 text-center">';
+                                   
+                                        switch(data._response[i]['StateValue']){
+                                            case "OK":
+                                                html += '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
+                                                break;
+                                            case "ALARM":
+                                                html += '<div class="alert alert-danger" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
+                                                break;
+                                            case "INSUFFICIENT_DATA":
+                                                html += '<div class="alert alert-warning" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
+                                                break;
+                                        } 
+
+                                        html +=         '</div>'+
+                                                        '<div class="col-md-6">'+
+                                                            '<button onclick="editAlarm(\''+ i +'\')" type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                                                        '</div>'+
+                                                    '</div>'+
+                                                '</div>'+
+                                            '</div>';
+
+                                        // html += '<div class="well col-md-5 col-md-offset-1"><h4>Historial</h4><div id="history'+ i +'"></div></div>'
+                                        html += "</div></div>";
+
+                                        cpu.append(html);
+                                        html = "";
+
+                                    }else if(data._response[i]['Namespace'] == 'AWS/Billing'){
+                                        html = '<div class="well col-md-4 init">'+
+                                                '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
+                                                '<div class="form-group">'+
+                                                    '<label>Nombre:</label> '+
+                                                    '<input class="form-control" type="text" value="'+ data._response[i]['AlarmName'] +'"> '+
+                                                '</div>'+
+                                                '<div class="form-group">'+
+                                                    '<label>Descripcion:</label> '+
+                                                    '<input class="form-control" type="text" value="'+data._response[i]['AlarmDescription']+'"> '+
+                                                '</div>'+
+                                                '<div class="form-group">'+
+                                                    '<div class="row">'+
+                                                        '<div class="col-md-6">'+
+                                                            '<label>Es:</label> '+
+                                                            '<select class="form-control">';
+                                        switch(data._response[i]['ComparisonOperator']){
+                                            case "GreaterThanThreshold":
+                                                html += '<option selected value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "GreaterThanOrEqualToThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option selected value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "LessThanThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option selected value="LessThanThreshold"><</option><option value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                            case "LessThanOrEqualToThreshold":
+                                                html += '<option value="GreaterThanThreshold">></option><option value="GreaterThanOrEqualToThreshold">>=</option><option value="LessThanThreshold"><</option><option selected value="LessThanOrEqualToThreshold"><=</option>';
+                                                break;
+                                        }
+                                       
+                                        html +=             '</select>'+
+                                                        '</div>'+
+                                                        '<div class="col-md-6">'+
+                                                            '<label>USD $:</label> '+
+                                                            '<input class="form-control" type="text" value="'+ data._response[i]['Threshold'].substring(0,data._response[i]['Threshold'].length-2) +'"> '+
+                                                        '</div>'+
+                                                    '</div>'+
+                                                '</div>'+
+                                                '<div class="form-group">'+
+                                                '<div class="row">'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Realice la acción:</label>'+
+                                                        '<fieldset id="changeCombox">'+
+                                                            '<select id="disabledSelect" class="form-control">'+
+                                                                '<option value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>'+
+                                                            '</select>'+
+                                                        '</fieldset>'+
+                                                    '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<label>Cuando esta alarma:</label>'+
+                                                        '<select class="form-control">'+
+                                                            '<option value="1">Estado de Alarma</option>'+
+                                                            '<option value="2">Estado Ok</option>'+
+                                                            '<option value="3">Estado Insuficiente</option>'+
+                                                        '</select>'+
+                                                    '</div>'+
+                                                '</div>'+
+                                            '</div>'+
+                                                '<div class="text-right">'+
+                                                    '<div class="row">'+
+                                                        '<div class="col-md-6 text-center">';
+
+                                                        switch(data._response[i]['StateValue']){
+                                                            case "OK":
+                                                                html += '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
+                                                                break;
+                                                            case "ALARM":
+                                                                html += '<div class="alert alert-danger" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
+                                                                break;
+                                                            case "INSUFFICIENT_DATA":
+                                                                html += '<div class="alert alert-warning" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
+                                                                break;
+                                                        }
+                                        html +=         '</div>'+
+                                                    '<div class="col-md-6">'+
+                                                        '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
+                                                    '</div>'+
+                                                '</div>'+
+                                            '</div>';
+
+                                        billing.append(html);
+                                        html = "";
+                                    }
+                                    Alarms.history(data._response[i]['AlarmName']);
+                                }
+
+                                if(cpu.html() == ''){
+                                    cpu.append('<div class="alert alert-info" role="alert">No existen Alarmas</div>');
+                                    console.log('No hay Alarmas de CPU');
+                                }
                             }
-                            Alarms.history(data._response[i]['AlarmName']);
-                        }
+                        })
 
-
-
-                        // cpu.append(
-                        //     '<div class="well col-md-4 init">'+
-                        //         '<br>'+
-                        //         '<div class="form-group">'+
-                        //             '<div class="row">'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Siempre que sea: </label>'+
-                        //                     '<select id="newStatistic" class="form-control">'+
-                        //                         '<option value="Average">Promedio</option>'+
-                        //                         '<option value="Minimum">Minimo</option>'+
-                        //                         '<option value="Maximum">Maximo</option>'+
-                        //                         '<option value="Sum">Total</option>'+
-                        //                         '<option value="SampleCount">SampleCount</option>'+
-                        //                     '</select>'+
-                        //                 '</div>'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>De:</label>'+
-                        //                     '<select id="newMetricName" onchange="createNameAlarm()" class="form-control">'+
-                        //                         '<option value="CPUUtilization">Consumo de CPU</option>'+
-                        //                         '<option value="NetworkOut">Red sin Servicio</option>'+
-                        //                         '<option value="DiskReadBytes">Lectura Disco</option>'+
-                        //                         '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                        //                         '<option value="DiskWriteBytes">Operaciones Escritura Disco</option>'+
-                        //                         '<option value="NetworkIn">Red en Servicio</option>'+
-                        //                     '</select>'+
-                        //                 '</div>'+
-                        //             '</div>'+
-                        //         '</div>'+
-                        //         '<div class="form-group">'+
-                        //             '<div class="row">'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Es:</label>'+
-                        //                     '<select id="newComparisonOperator" class="form-control">'+
-                        //                         '<option value="GreaterThanThreshold">></option>'+
-                        //                         '<option value="GreaterThanOrEqualToThreshold">>=</option>'+
-                        //                         '<option value="LessThanThreshold"><</option>'+
-                        //                         '<option value="LessThanOrEqualToThreshold"><=</option>'+
-                        //                     '</select>'+
-                        //                 '</div>'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Porcentaje:</label>'+
-                        //                     '<input id="newThreshold" class="form-control" type="text">'+
-                        //                 '</div>'+
-                        //             '</div>'+  
-                        //         '</div>'+
-                        //         '<div class="form-group">'+
-                        //             '<div class="row">'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Por lo menos:</label>'+
-                        //                     '<input id="newEvaluationPeriods" class="form-control" type="text">'+
-                        //                 '</div>'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Período(s) de</label>'+
-                        //                     '<select id="newPeriod" class="form-control">'+
-                        //                         '<option value="300">5 Minutos</option>'+
-                        //                         '<option value="900">15 Minutos</option>'+
-                        //                         '<option value="3600">1 Hora</option>'+
-                        //                         '<option value="21600">6 Hora</option>'+
-                        //                         '<option value="86400">1 Dia</option>'+
-                        //                     '</select>'+
-                        //                 '</div>'+
-                        //             '</div>'+
-                        //         '</div>'+
-                        //         '<div class="form-group">'+
-                        //             '<div class="row">'+
-                        //                 '<div class="col-md-6">'+
-                        //                     // '<input id="showComboxCpu" type="checkbox"> '+
-                        //                     '<label>Realice la acción:</label>'+
-                        //                     '<fieldset id="changeCombox">'+
-                        //                         '<select id="newActionAlarm" class="form-control">'+
-                        //                             '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                        //                             '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                        //                         '</select>'+
-                        //                     '</fieldset>'+
-                        //                 '</div>'+
-                        //                 '<div class="col-md-6">'+
-                        //                     '<label>Cuando esta alarma:</label>'+
-                        //                     '<select id="newSelectAlarm" class="form-control">'+
-                        //                         '<option value="alarm">Estado de Alarma</option>'+
-                        //                         '<option value="ok">Estado Ok</option>'+
-                        //                         '<option value="insufficient">Estado Insuficiente</option>'+
-                        //                     '</select>'+
-                        //                 '</div>'+
-                        //             '</div>'+
-                        //         '</div>'+
-                        //         '<div class="form-group">'+
-                        //             '<label>Nombre de Alarma:</label>'+
-                        //             '<input id="newNameAlarm" class="form-control" type="text" value="awsec2-'+ instanceID +'-CPUUtilization">'+
-                        //         '</div>'+
-                        //         '<hr>'+
-                        //         '<div class="text-right">'+
-                        //             '<button onclick="createAlarm(\''+ instanceID +'\')" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>'+
-                        //         '</div>'+
-                        //     '</div>'
-                        // );
                     }
                 }).error(function (data){
                     $('#stateServices').text('Servicio [Off]');
@@ -744,8 +773,8 @@
                 }, 100000);
             },
             history: function(name){
-                console.log(name);
-                var post = { 'AlarmName': name }
+               /* console.log(name);
+                var post = { 'AlarmName': name }*/
 
                 // uget({
                 //     url: LinkServer.Url('alarm', 'getHistory'),
@@ -794,52 +823,24 @@
                                 
                                 instance.find(".i_instance").html(tmp.Name);
                             } else {
-                                var tr = $("<tr/>", {
-                                    id: tmp.InstanceId,
-                                    class: '_alarm'
-                                });
-                                
-                                $("<td/>", {
-                                    class: 'i_instance',
-                                    html: tmp.Name
-                                }).appendTo(tr);
 
-                                $("<td/>", {
-                                    class: 'i_name',
-                                    html: ''
-                                }).appendTo(tr);
-
-                                $("<td/>", {
-                                    class: 'i_status text-center'
-                                }).html(
-                                    $('<button/>',{
-                                        class: 'btn btn-success'
-                                    }).text('OK')
-                                ).appendTo(tr);
-                                
-                                tr.appendTo(table);
+                                $("#listInstances").append(
+                                    $('<option/>',{
+                                        val: tmp.InstanceId,
+                                        text: tmp.Name
+                                    })
+                                )
                             }
                             
                             Instances.list[tmp.InstanceId] = {
                                 Name : tmp.Name
                             };
                         }
-                        
-                        if(first) {
-                            table.tablesorter();
-                            first = false;
-                        }
                     }
                 }).error(function (data){
                     $('#stateServices').text('Servicio [Off]');
                     console.log('Servicio [Off]');
                 });
-            },
-            refresh: function () {
-                Instances.load();
-                setTimeout(function () {
-                    Instances.refresh();
-                }, 10000);
             }
         };
 
@@ -867,11 +868,13 @@
                     float: 'right'
                 }).click(function (e) {
                     e.preventDefault();
+                    $('#newAlarmModal').modal('show');
+                    createNameAlarm();
                 })
             );
             
             Alarms.refresh();
-            // Instances.refresh();
+            //Instances.load();
         });
 
 
@@ -883,14 +886,88 @@
             });
         }
 
-        function AlarmAdd (name) {
-            var del = { 'AlarmName': name }
+        function createAlarm(){
+            var op = $('#newSelectAlarm option:selected').val();
+            var ok = "";
+            var alarm = "";
+            var ins = "";
+
+            switch(op){
+                case "ALARM":
+                    alarm = $('#newActionAlarm option:selected').val();
+                    break;
+                case "OK":
+                    ok = $('#newActionAlarm option:selected').val();
+                    break;
+                case "INSUFFICIENT_DATA":
+                    ins = $('#newActionAlarm option:selected').val();
+                    break;
+            }
+
+            var post = {
+                'AlarmName': $('#newNameAlarm').val(),
+                'OKActions': ok,
+                'AlarmActions': alarm,
+                'InsufficientDataActions': ins,
+                'MetricName': $('#newMetricName option:selected').val(),
+                'Statistic': $('#newStatistic option:selected').val(),
+                'InstanceId': $('#listInstances option:selected').val(),
+                'Period': $('#newPeriod option:selected').val(),
+                'EvaluationPeriods': $('#newEvaluationPeriods').val(),
+                'Threshold': $('#newThreshold').val(),
+                'ComparisonOperator': $('#newComparisonOperator option:selected').val()
+            }
+
             uget({
-                url : LinkServer.Url('alarm', 'delete'),
-                type: 'DELETE',
-                data: del
+                url : LinkServer.Url('alarm', 'add'),
+                type: 'POST',
+                data: post
             }).done(function (data) {
+                $('#newThreshold').val('');
+                $('#newAlarmModal').modal('hide');
                 Alarms.refresh();
+            });
+        }
+
+        function editAlarm(iterator){
+            var op = $('#'+iterator+'SelectAlarm option:selected').val();
+            var ok = "";
+            var alarm = "";
+            var ins = "";
+
+            switch(op){
+                case "ALARM":
+                    alarm = $('#'+iterator+'ActionAlarm option:selected').val();
+                    break;
+                case "OK":
+                    ok = $('#'+iterator+'ActionAlarm option:selected').val();
+                    break;
+                case "INSUFFICIENT_DATA":
+                    ins = $('#'+iterator+'ActionAlarm option:selected').val();
+                    break;
+            }
+
+            var post = {
+                'AlarmName': $('#'+iterator+'NameAlarm').val(),
+                'OKActions': ok,
+                'AlarmActions': alarm,
+                'InsufficientDataActions': ins,
+                'MetricName': $('#'+iterator+'MetricName option:selected').val(),
+                'Statistic': $('#'+iterator+'Statistic option:selected').val(),
+                'InstanceId': $('#'+iterator+'listInstances').val(),
+                'Period': $('#'+iterator+'Period option:selected').val(),
+                'EvaluationPeriods': $('#'+iterator+'EvaluationPeriods').val(),
+                'Threshold': $('#'+iterator+'Threshold').val(),
+                'ComparisonOperator': $('#'+iterator+'ComparisonOperator option:selected').val()
+            }
+
+            uget({
+                url : LinkServer.Url('alarm', 'add2'),
+                type: 'POST',
+                data: post
+            }).done(function (data) {
+                alert('ok r');
+                //Alarms.refresh();
             });
         }
 
@@ -903,6 +980,27 @@
             }).done(function (data) {
                 Alarms.refresh();
             });
+        }
+
+        function createNameAlarm() {
+            var str = "";
+            var str2 = "";
+            var metric = $( "#newMetricName option:selected" ).val();
+            var instance = $( "#listInstances option:selected" ).val();
+                
+            str += "awsec2-" + instance + "-" + metric;
+            console.log(str);
+
+            if(metric == 'CPUUtilization'){
+                str2 = "Porcentaje:";
+            }else if(metric == '' || metric == 'DiskReadBytes' || metric == 'NetworkOut' || metric == 'NetworkIn'){
+                str2 = "Bytes:";
+            }else if(metric == 'DiskReadOps' || metric == 'DiskWriteBytes'){
+                str2 = "Operaciones:";
+            }
+
+            $( "#changeLabelForm" ).text( str2 );
+            $( "#newNameAlarm" ).val( str );
         }
     </script>
 

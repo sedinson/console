@@ -77,7 +77,7 @@
                             <!-- /input-group -->
                         </li>
                         <li>
-                            <a href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
+                            <a class="active" href="welcome.html"><i class="glyphicon glyphicon-dashboard"></i> Instancias</a>
                             <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
@@ -128,7 +128,7 @@
                                                     <th>Estado</th>
                                                     <th>IP Privada / Publica</th>
                                                     <th>Horarios</th>
-                                                    <th>Alarmas</th>
+                                                    <!-- <th>Alarmas</th> -->
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -280,9 +280,9 @@
                                 instance.find(".i_launch").find("button").html(
                                             "<i class='fa fa-clock-o fa-fw'></i> " + tmp.schedulers + ' horario' + ((tmp.schedulers == 1)? "" : "s")
                                         );
-                                instance.find(".i_alarm").find("button").html(
-                                            "<i class='fa fa-clock-o fa-fw'></i> " + tmp.Alarms + ' alarma' + ((tmp.Alarms == 1)? "" : "s")
-                                        );
+                                //instance.find(".i_alarm").find("button").html(
+                                //            "<i class='fa fa-clock-o fa-fw'></i> " + tmp.Alarms + ' alarma' + ((tmp.Alarms == 1)? "" : "s")
+                                //        );
                             } else {
                                 var tr = $("<tr/>", {
                                     id: tmp.InstanceId,
@@ -338,7 +338,7 @@
                                     ).appendTo(tr);
                                 })(tmp);
 
-                                (function (_tmp) {
+                                /*(function (_tmp) {
                                     $("<td/>", {
                                         class: 'i_alarm'
                                     }).html(
@@ -352,7 +352,7 @@
                                             Instances.alarms(_tmp.InstanceId, _tmp.Name);
                                         })
                                     ).appendTo(tr);
-                                })(tmp);
+                                })(tmp);*/
                                 
                                 tr.appendTo(table);
                             }
@@ -486,322 +486,6 @@
                         showModal(data._message);
                     }
                 });
-            },
-            alarms: function (instanceID, instanceName) {
-                Instances.selected = instanceID;
-                
-                $("#instances-page").css({
-                    display: 'none'
-                });
-                
-                $("#alarms-page").css({
-                    display: 'block'
-                }).find(".page-header").html(
-                    instanceName
-                ).append(
-                    $("<a/>", {
-                        href: '#',
-                        html: '[volver]'
-                    }).css({
-                        'font-size': '0.6em',
-                        position: 'relative',
-                        float: 'right'
-                    }).click(function (e) {
-                        e.preventDefault();
-                        
-                        $("#instances-page").css({
-                            display: 'block'
-                        });
-
-                        $("#alarms-page").css({
-                            display: 'none'
-                        });
-                    })
-                );
-
-                var workflow = $("#cpu");
-                workflow.empty();
-                        
-                $("#cpu").append(
-                    '<br>'+
-                    '<div class="well col-md-4 init">'+
-                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Siempre que sea: </label>'+
-                                    '<select class="form-control">'+
-                                        '<option value="Average">Promedio</option>'+
-                                        '<option value="Minimum">Minimo</option>'+
-                                        '<option value="Sum">Total</option>'+
-                                        '<option value="SampleCount">SampleCount</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>De:</label>'+
-                                    '<select class="form-control">'+
-                                        '<option value="CPU Utilization">Consumo de CPU</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Es:</label>'+
-                                    '<select class="form-control">'+
-                                        '<option value="GreaterThanThreshold">></option>'+
-                                        '<option value="GreaterThanOrEqualToThreshold">>=</option>'+
-                                        '<option value="LessThanThreshold"><</option>'+
-                                        '<option value="LessThanOrEqualToThreshold"><=</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Porcentaje:</label>'+
-                                    '<input class="form-control" type="text" value="10">'+
-                                '</div>'+
-                            '</div>'+  
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Por lo menos:</label><br>'+
-                                    '<input class="form-control" type="text" value="1">'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Período(s) de</label>'+
-                                    '<select class="form-control">'+
-                                        '<option value="300">5 Minutos</option>'+
-                                        '<option value="900">15 Minutos</option>'+
-                                        '<option value="3600">1 Hora</option>'+
-                                        '<option value="21600">6 Hora</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    // '<input id="showComboxCpu" type="checkbox"> '+
-                                    '<label>Realice la acción:</label>'+
-                                    '<fieldset id="changeCombox">'+
-                                        '<select id="disabledSelect" class="form-control">'+
-                                            '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                            '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                        '</select>'+
-                                    '</fieldset>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Cuando esta alarma:</label>'+
-                                    '<select class="form-control">'+
-                                        '<option value="1">Estado de Alarma</option>'+
-                                        '<option value="2">Estado Ok</option>'+
-                                        '<option value="3">Estado Insuficiente</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Nombre de Alarma:</label>'+
-                            '<input class="form-control" type="text" value="awsec2-i-b1e6569c-CPU-Utilization"><hr>'+
-                        '</div>'+
-                        '<div class="text-right">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6 text-center">'+
-                                    // '<div class="alert alert-warning" role="alert" style="padding:6px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>'+
-                                    // '<div class="alert alert-danger" role="alert" style="padding:6px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>'+
-                                    '<div class="alert alert-success" role="alert" style="padding:6px; margin: 0;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                    '</div>'
-                );
-
-                $("#cpu").append(
-                    '<div class="well col-md-4 init">'+
-                        '<br>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Siempre que sea: </label>'+
-                                    '<select id="newStatistic" class="form-control">'+
-                                        '<option value="Average">Promedio</option>'+
-                                        '<option value="Minimum">Minimo</option>'+
-                                        '<option value="Maximum">Maximo</option>'+
-                                        '<option value="Sum">Total</option>'+
-                                        '<option value="SampleCount">SampleCount</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>De:</label>'+
-                                    '<select id="newMetricName" onchange="createNameAlarm(\''+ instanceID +'\')" class="form-control">'+
-                                        '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                        '<option value="NetworkOut">Red sin Servicio</option>'+
-                                        '<option value="DiskReadBytes">Red sin Servicio</option>'+
-                                        '<option value="DiskReadOps">Red sin Servicio</option>'+
-                                        '<option value="DiskWriteBytes">Red sin Servicio</option>'+
-                                        '<option value="NetworkIn">Red sin Servicio</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Es:</label>'+
-                                    '<select id="newComparisonOperator" class="form-control">'+
-                                        '<option value="GreaterThanThreshold">></option>'+
-                                        '<option value="GreaterThanOrEqualToThreshold">>=</option>'+
-                                        '<option value="LessThanThreshold"><</option>'+
-                                        '<option value="LessThanOrEqualToThreshold"><=</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Porcentaje:</label>'+
-                                    '<input id="newThreshold" class="form-control" type="text">'+
-                                '</div>'+
-                            '</div>'+  
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Por lo menos:</label>'+
-                                    '<input id="newEvaluationPeriods" class="form-control" type="text">'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Período(s) de</label>'+
-                                    '<select id="newPeriod" class="form-control">'+
-                                        '<option value="300">5 Minutos</option>'+
-                                        '<option value="900">15 Minutos</option>'+
-                                        '<option value="3600">1 Hora</option>'+
-                                        '<option value="21600">6 Hora</option>'+
-                                        '<option value="86400">1 Dia</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    // '<input id="showComboxCpu" type="checkbox"> '+
-                                    '<label>Realice la acción:</label>'+
-                                    '<fieldset id="changeCombox">'+
-                                        '<select id="newActionAlarm" class="form-control">'+
-                                            '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                            '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                        '</select>'+
-                                    '</fieldset>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>Cuando esta alarma:</label>'+
-                                    '<select id="newSelectAlarm" class="form-control">'+
-                                        '<option value="alarm">Estado de Alarma</option>'+
-                                        '<option value="ok">Estado Ok</option>'+
-                                        '<option value="insufficient">Estado Insuficiente</option>'+
-                                    '</select>'+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Nombre de Alarma:</label>'+
-                            '<input id="newNameAlarm" class="form-control" type="text" value="awsec2-'+ instanceID +'-CPUUtilization">'+
-                        '</div>'+
-                        '<hr>'+
-                        '<div class="text-right">'+
-                            '<button onclick="createAlarm(\''+ instanceID +'\')" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>'+
-                        '</div>'+
-                    '</div>'
-                );
-
-                var workflow = $("#billing");
-                workflow.empty();
-
-                $("#billing").append(
-                    '<br><div class="well col-md-4 init">'+
-                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><br>'+
-                        '<div class="form-group">'+
-                            '<label>Nombre:</label> '+
-                            '<input class="form-control" type="text" value="EstimatedCharges"> '+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Descripcion:</label> '+
-                            '<input class="form-control" type="text" value="AWS/Billing"> '+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Es:</label> '+
-                                    '<select class="form-control">'+
-                                        '<option value="1">></option>'+
-                                        '<option value="2">>=</option>'+
-                                        '<option value="3"><</option>'+
-                                        '<option value="4"><=</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>USD $:</label> '+
-                                    '<input class="form-control" type="text"> '+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Cuando esta alarma:</label> '+
-                            '<select class="form-control">'+
-                                '<option value="1">Estado de Alarma</option>'+
-                                '<option value="2">Estado Ok</option>'+
-                                '<option value="3">Estado Insuficiente</option>'+
-                            '</select>'+
-                        '</div>'+
-                        '<div class="text-right">'+
-                            '<button type="submit" class="btn btn-default"><i class="glyphicon glyphicon-ok"></i> Guardar Alarma</button>'+
-                        '</div>'+
-                    '</div>'
-                );
-
-                $("#billing").append(
-                    '<div class="well col-md-4 init">'+
-                        '<br>'+
-                        '<div class="form-group">'+
-                            '<label>Nombre:</label> '+
-                            '<input class="form-control" type="text" value="EstimatedCharges"> '+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Descripcion:</label> '+
-                            '<input class="form-control" type="text" value="AWS/Billing"> '+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<div class="row">'+
-                                '<div class="col-md-6">'+
-                                    '<label>Es:</label> '+
-                                    '<select class="form-control">'+
-                                        '<option value="1">></option>'+
-                                        '<option value="2">>=</option>'+
-                                        '<option value="3"><</option>'+
-                                        '<option value="4"><=</option>'+
-                                    '</select>'+
-                                '</div>'+
-                                '<div class="col-md-6">'+
-                                    '<label>USD $:</label> '+
-                                    '<input class="form-control" type="text"> '+
-                                '</div>'+
-                            '</div>'+
-                        '</div>'+
-                        '<div class="form-group">'+
-                            '<label>Cuando esta alarma:</label> '+
-                            '<select class="form-control">'+
-                                '<option value="1">Estado de Alarma</option>'+
-                                '<option value="2">Estado Ok</option>'+
-                                '<option value="3">Estado Insuficiente</option>'+
-                            '</select>'+
-                        '</div>'+
-                        '<div class="text-right">'+
-                            '<button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>'+
-                        '</div>'+
-                    '</div>'
-                );
             }
         };
 
