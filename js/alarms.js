@@ -377,7 +377,50 @@ var Alarms = {
                                         '</div>'+
                                     '</div>';
 
-                                // html += '<div class="well col-md-5 col-md-offset-1"><h4>Historial</h4><div id="history'+ i +'"></div></div>'
+                                html += '<div class="well col-md-5" style="margin-left:2%;">'+
+                                            '<h4>Historial</h4>'+
+                                            '<div id="history'+ i +'">'+
+                                                '<ul class="timeline">'+
+                                                    '<li>'+
+                                                        '<div class="timeline-badge warning">'+
+                                                            '<i class="fa fa-check"></i>'+
+                                                        '</div>'+
+                                                        '<div class="timeline-panel">'+
+                                                            '<div class="timeline-heading">'+
+                                                                '<h4 class="timeline-title">Lorem ipsum dolor</h4>'+
+                                                                '<p>'+
+                                                                    '<small class="text-muted">'+
+                                                                        '<i class="fa fa-check"></i> 11 hours ago via Twitter'+
+                                                                    '</small>'+
+                                                                '</p>'+
+                                                            '</div>'+
+                                                            '<div class="timeline-body">'+
+                                                                '<p>Lorem ipsum dolor sit amet</p>'+
+                                                            '</div>'+
+                                                        '</div>'+
+                                                    '</li>'+
+                                                    '<li class="timeline-inverted">'+
+                                                        '<div class="timeline-badge warning">'+
+                                                            '<i class="fa fa-check"></i>'+
+                                                        '</div>'+
+                                                        '<div class="timeline-panel">'+
+                                                            '<div class="timeline-heading">'+
+                                                                '<h4 class="timeline-title">Lorem ipsum dolor</h4>'+
+                                                                '<p>'+
+                                                                    '<small class="text-muted">'+
+                                                                        '<i class="fa fa-check"></i> 11 hours ago via Twitter'+
+                                                                    '</small>'+
+                                                                '</p>'+
+                                                            '</div>'+
+                                                            '<div class="timeline-body">'+
+                                                                '<p>Lorem ipsum dolor sit amet.</p>'+
+                                                                '<p>Lorem ipsum dolor sit amet.</p>'+
+                                                            '</div>'+
+                                                        '</div>'+
+                                                    '</li>'+
+                                                '</ul>'+
+                                            '</div>'+
+                                        '</div>';   
                                 html += "</div></div>";
 
                                 cpu.append(html);
@@ -566,11 +609,11 @@ var Instances = {
 
 function showModal(context){
     var footer = $("<button/>",{
-        class: 'btn btn-primary',
-        'data-dismiss': 'modal',
-        type: 'button'
-    }).html("Aceptar");
-
+            class: 'btn btn-primary',
+            'data-dismiss': 'modal',
+            type: 'button'
+        }).html("Aceptar");
+    $('#myModal .modal-title').html('Console - Soluntech');
     $('#myModal .modal-footer').html(footer);
     $('#myModal .contex-text').text(context);
     $('#myModal').modal('show');

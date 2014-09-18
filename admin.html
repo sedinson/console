@@ -112,11 +112,11 @@
 
                                         <tfoot>
                                             <tr>
-                                                <td><input type="text" class="form-control" name="idaccount" placeholder="ID" /></td>
+                                                <td><input type="text" class="form-control" id="newIdaccount" name="idaccount" placeholder="ID" /></td>
                                                 <td><input type="text" class="form-control" name="name" placeholder="Nombre" /></td>
-                                                <td><input type="email" class="form-control" name="email" placeholder="email" /></td>
-                                                <td><input type="text" class="form-control" name="secretkey" placeholder="Secret Key" /></td>
-                                                <td><input type="text" class="form-control" name="accesskey" placeholder="Access Key" /></td>
+                                                <td><input type="email" class="form-control" id="newEmail" name="email" placeholder="email" /></td>
+                                                <td><input type="text" class="form-control" id="newSecretkey" name="secretkey" placeholder="Secret Key" /></td>
+                                                <td><input type="text" class="form-control" id="newAccesskey" name="accesskey" placeholder="Access Key" /></td>
                                                 <td><input type="submit" class="btn-info form-control" value="Agregar" /></td>
                                             </tr>
                                         </tfoot>
@@ -232,18 +232,22 @@
                     data: params
                 }).done(function (data) {
                     if(data._code === 200){
-                        var email = this.email.value;
-                        var AccountId = this.idaccount.value;
+                        var email = $('#newEmail').val();
+                        var AccountId = $('#newIdaccount').val();
+                        var Secretkey = $('#newSecretkey').val();
+                        var Accesskey = $('#newAccesskey').val();
                         uget({
                             type: 'POST',
                             url: LinkServer.Url('sns', 'subscribe'),
                             data: {
                                 'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
-                                'Endpoint': email
+                                'Endpoint': email,
+                                'Secretkey': Secretkey,
+                                'Accesskey': Accesskey
                             }
                         }).done(function (data) {
                             if(data._code != 200) {
-                                showModal("No se pudo subscribir el correo: " + email);
+                                showModal(data._message + ". No se pudo subscribir el correo: " + email);
                             } else {
                                 showModal("Cuenta agregada!");
                                 Accounts.load();
@@ -257,7 +261,7 @@
             
             $("#frm-adduser").submit(function (e) {
                 e.preventDefault();
-                
+
                 params = parametrizer($(this));
                 uget({
                     type: 'POST',
@@ -277,13 +281,18 @@
         function showModal(context){
             var footer = $("<button/>",{
                     class: 'btn btn-primary',
+                    name: 'dismiss',
                     'data-dismiss': 'modal',
                     type: 'button'
                 }).html("Aceptar");
-
+            $('#myModal .modal-title').html('Console - Soluntech');
             $('#myModal .modal-footer').html(footer);
             $('#myModal .contex-text').text(context);
             $('#myModal').modal('show');
+            setTimeout(function(){
+                $('#myModal .contex-footer').find("[name=dismiss]").focus();
+                console.log('setTimeout');
+            }, 700);
         }
         
         function logout () {

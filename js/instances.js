@@ -266,11 +266,11 @@ var Instances = {
 
 function showModal(context){
     var footer = $("<button/>",{
-        class: 'btn btn-primary',
-        'data-dismiss': 'modal',
-        type: 'button'
-    }).html("Aceptar");
-
+            class: 'btn btn-primary',
+            'data-dismiss': 'modal',
+            type: 'button'
+        }).html("Aceptar");
+    $('#myModal .modal-title').html('Console - Soluntech');
     $('#myModal .modal-footer').html(footer);
     $('#myModal .contex-text').text(context);
     $('#myModal').modal('show');
