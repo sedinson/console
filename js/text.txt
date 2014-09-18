@@ -1,6 +1,0 @@
-<option value="CPUUtilization">Consumo de CPU</option>
-<option value="NetworkOut">Transferencia de Datos de Salida</option>
-<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>
-<option value="DiskReadOps">Operaciones Lectura Disco</option>
-<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>
-<option value="NetworkIn">Transferencia de Datos de Entrada</option>
