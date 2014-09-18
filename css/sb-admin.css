@@ -341,6 +341,9 @@ table.dataTable thead .sorting:after {
 .red {
     color: red;
 }
+.red:hover {
+    color: rgb(151, 18, 18);
+}
 
 [class^="st-"] {
     padding: 2px 8px;
@@ -434,4 +437,8 @@ ul li a.active {
 
 .huge {
     font-size: 40px;
+}
+
+#alarms-page{
+    display: none;
 }

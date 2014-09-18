@@ -1,5 +1,5 @@
 var AccountId = null;
-    $('#stateServices').text('Servicio [Off]');
+$('#stateServices').text('Servicio [Off]');
 
 var Alarms = {
     list: {},
@@ -39,23 +39,27 @@ var Alarms = {
 
                             if(data._response[i].Namespace == 'AWS/EC2'){
 
-                                var tempButton = "";
+                                var tempDiv = "";
+                                var tempText = "";
 
                                 switch(data._response[i].StateValue){
                                     case "OK":
-                                        tempButton += '<div class="alert alert-success" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</div>';
+                                        tempDiv += 'list-group-item list-group-item-success';
+                                        tempText += '<span style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Ok</span>';
                                         break;
                                     case "ALARM":
-                                        tempButton += '<div class="alert alert-danger" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</div>';
+                                        tempDiv += 'list-group-item list-group-item-danger';
+                                        tempText += '<span style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Alarma</span>';
                                         break;
                                     case "INSUFFICIENT_DATA":
-                                        tempButton += '<div class="alert alert-warning" role="alert" style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</div>';
+                                        tempDiv += 'list-group-item list-group-item-warning';
+                                        tempText += '<span style="padding:2px; margin:0; float:right; margin-top:-3px;"><i class="glyphicon glyphicon-exclamation-sign"></i> Insuficiente</span>';
                                         break;
                                 }
 
-                                html = '<div class="panel-heading">'+
+                                html = '<div class="' + tempDiv +'">'+
                                             '<h4 class="panel-title">'+
-                                                tempButton +
+                                                tempText +
                                                 '<a data-toggle="collapse" data-parent="#accordion" href="#collapse'+ i +'">'+
                                                     tempInstanceName + ': ' + data._response[i].AlarmName +
                                                 '</a>'+
@@ -77,36 +81,31 @@ var Alarms = {
                                         html += '<option selected value="Average">Promedio</option>'+
                                                 '<option value="Minimum">Minimo</option>'+
                                                 '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
+                                                '<option value="Sum">Total</option>';
                                         break;
                                     case "Minimum":
                                         html += '<option value="Average">Promedio</option>'+
                                                 '<option selected value="Minimum">Minimo</option>'+
                                                 '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
+                                                '<option value="Sum">Total</option>';
                                         break;
                                     case "Maximum":
                                         html += '<option value="Average">Promedio</option>'+
                                                 '<option value="Minimum">Minimo</option>'+
                                                 '<option selected value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
+                                                '<option value="Sum">Total</option>';
                                         break;
                                     case "Sum":
                                         html += '<option value="Average">Promedio</option>'+
                                                 '<option value="Minimum">Minimo</option>'+
                                                 '<option value="Maximum">Maximo</option>'+
-                                                '<option selected value="Sum">Total</option>'+
-                                                '<option value="SampleCount">SampleCount</option>';
+                                                '<option selected value="Sum">Total</option>';
                                         break;
                                     case "SampleCount":
                                         html += '<option value="Average">Promedio</option>'+
                                                 '<option value="Minimum">Minimo</option>'+
                                                 '<option value="Maximum">Maximo</option>'+
-                                                '<option value="Sum">Total</option>'+
-                                                '<option selected value="SampleCount">SampleCount</option>';
+                                                '<option value="Sum">Total</option>';
                                         break;
                                 }
                                                    
@@ -118,53 +117,48 @@ var Alarms = {
 
                                 switch(data._response[i]['MetricName']){
                                     case "CPUUtilization":
-                                        html += '<option selected value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                        html += '<option selected value="CPUUtilization">Consumo de CPU</option>';
                                         break;
-                                    case "NetworkOut":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option selected value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
-                                        break;
-                                    case "DiskReadBytes":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option selected value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
-                                        break;
-                                    case "DiskReadOps":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option selected value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
-                                        break;
-                                    case "DiskWriteBytes":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option selected value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
-                                        break;
-                                    case "NetworkIn":
-                                        html += '<option value="CPUUtilization">Consumo de CPU</option>'+
-                                                '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
-                                                '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
-                                                '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
-                                                '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
-                                                '<option selected value="NetworkIn">Transferencia de Datos de Entrada</option>';
-                                        break;
+                                    // case "NetworkOut":
+                                    //     html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                    //             '<option selected value="NetworkOut">Transferencia de Datos de Salida</option>'+
+                                    //             '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
+                                    //             '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                    //             '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
+                                    //             '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                    //     break;
+                                    // case "DiskReadBytes":
+                                    //     html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                    //             '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
+                                    //             '<option selected value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
+                                    //             '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                    //             '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
+                                    //             '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                    //     break;
+                                    // case "DiskReadOps":
+                                    //     html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                    //             '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
+                                    //             '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
+                                    //             '<option selected value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                    //             '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
+                                    //             '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                    //     break;
+                                    // case "DiskWriteBytes":
+                                    //     html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                    //             '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
+                                    //             '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
+                                    //             '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                    //             '<option selected value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
+                                    //             '<option value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                    //     break;
+                                    // case "NetworkIn":
+                                    //     html += '<option value="CPUUtilization">Consumo de CPU</option>'+
+                                    //             '<option value="NetworkOut">Transferencia de Datos de Salida</option>'+
+                                    //             '<option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>'+
+                                    //             '<option value="DiskReadOps">Operaciones Lectura Disco</option>'+
+                                    //             '<option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>'+
+                                    //             '<option selected value="NetworkIn">Transferencia de Datos de Entrada</option>';
+                                    //     break;
                                     default :
                                         html += '<option value="0">No estimado</option>';
                                 }
@@ -177,7 +171,7 @@ var Alarms = {
                                     '<div class="form-group">'+
                                         '<div class="row">'+
                                             '<div class="col-md-6">'+
-                                                '<label>Es:</label>'+
+                                                '<label>Con la condición de que:</label>'+
                                                 '<select id="'+ i +'ComparisonOperator" class="form-control">';
 
                                 switch(data._response[i]['ComparisonOperator']){
@@ -198,7 +192,7 @@ var Alarms = {
                                 html +=         '</select>'+
                                             '</div>'+
                                             '<div class="col-md-6">'+
-                                                '<label id="'+ i +'changeLabelForm">Porcentaje:</label>'+
+                                                '<label id="'+ i +'changeLabelForm">Porcentaje (%):</label>'+
                                                 '<input id="'+ i +'Threshold" class="form-control" type="text" value="'+ data._response[i]['Threshold'].substring(0,data._response[i]['Threshold'].length-2) +'">'+
                                             '</div>'+
                                         '</div>'+  
@@ -206,7 +200,7 @@ var Alarms = {
                                     '<div class="form-group">'+
                                         '<div class="row">'+
                                             '<div class="col-md-6">'+
-                                                '<label>Por lo menos:</label><br>'+
+                                                '<label>Durante por lo menos (Ciclos):</label><br>'+
                                                 '<input id="'+ i +'EvaluationPeriods" class="form-control" type="text" value="'+ data._response[i]['EvaluationPeriods'] +'">'+
                                             '</div>'+
                                             '<div class="col-md-6">'+
@@ -271,7 +265,7 @@ var Alarms = {
                                     '<div class="form-group">'+
                                         '<div class="row">'+
                                             '<div class="col-md-6">'+
-                                                '<label>Realice la acción:</label>'+
+                                                '<label>Realice la acción de:</label>'+
                                                 '<fieldset id="changeCombox">'+
                                                     '<select id="'+ i +'ActionAlarm" class="form-control">';
 
@@ -279,17 +273,15 @@ var Alarms = {
                                     switch(data._response[i]['OKActions'][0]){
                                         case "arn:aws:automate:us-east-1:ec2:stop":
                                             html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
-                                        case "arn:aws:automate:us-east-1:ec2:terminate":
-                                            html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                    '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
-                                            break;
+                                        // case "arn:aws:automate:us-east-1:ec2:terminate":
+                                        //     html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                        //             '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                        //             '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
+                                        //     break;
                                         default:
                                             html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option selected value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
                                     }
@@ -299,17 +291,15 @@ var Alarms = {
                                     switch(data._response[i]['AlarmActions'][0]){
                                         case "arn:aws:automate:us-east-1:ec2:stop":
                                             html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
-                                        case "arn:aws:automate:us-east-1:ec2:terminate":
+                                        // case "arn:aws:automate:us-east-1:ec2:terminate":
+                                        //     html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                        //             '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                        //             '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
+                                        //     break;
+                                        default:
                                             html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                    '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
-                                            break;
-                                        default :
-                                            html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option selected value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
                                     }
@@ -319,17 +309,15 @@ var Alarms = {
                                     switch(data._response[i]['InsufficientDataActions'][0]){
                                         case "arn:aws:automate:us-east-1:ec2:stop":
                                             html += '<option selected value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
-                                        case "arn:aws:automate:us-east-1:ec2:terminate":
-                                            html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
-                                                    '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
-                                            break;
+                                        // case "arn:aws:automate:us-east-1:ec2:terminate":
+                                        //     html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
+                                        //             '<option selected value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
+                                        //             '<option value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
+                                        //     break;
                                         default:
                                             html += '<option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>'+
-                                                    '<option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>'+
                                                     '<option selected value="arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe">Notificarme</option>';
                                             break;
                                     }
@@ -339,21 +327,18 @@ var Alarms = {
                                                 '</fieldset>'+
                                             '</div>'+
                                             '<div class="col-md-6">'+
-                                                '<label>Cuando esta alarma:</label>'+
+                                                '<label>Cuando este en estado de:</label>'+
                                                 '<select id="'+ i +'SelectAlarm" class="form-control">';
 
                                 if(data._response[i]['OKActions'][0] != null){
                                     html += '<option value="ALARM">Estado de Alarma</option>'+
-                                            '<option selected value="OK">Estado Ok</option>'+
-                                            '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
+                                            '<option selected value="OK">Estado Ok</option>';
                                 }else if(data._response[i]['AlarmActions'][0] != null){
                                     html += '<option selected value="ALARM">Estado de Alarma</option>'+
-                                            '<option value="OK">Estado Ok</option>'+
-                                            '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
-                                }else if(data._response[i]['AlarmActions'][0] != null){
+                                            '<option value="OK">Estado Ok</option>';
+                                }else if(data._response[i]['InsufficientDataActions'][0] != null){
                                     html += '<option value="ALARM">Estado de Alarma</option>'+
-                                            '<option value="OK">Estado Ok</option>'+
-                                            '<option value="INSUFFICIENT_DATA">Estado Insuficiente</option>';
+                                            '<option value="OK">Estado Ok</option>';
                                 }
 
                                 html +=        '</select>'+
@@ -362,13 +347,12 @@ var Alarms = {
                                     '</div>'+
                                     '<div class="form-group">';
 
-                                html += '<label>Instancia:</label> ' + tempInstanceName +
+                                html += '<label>En el servidor de:</label> ' + tempInstanceName +
                                         '<input type="hidden" id="'+ i +'Instances" value="' + data._response[i]['Dimensions'][0].Value + '">' +
                                     '</div>'+
                                     '<div class="form-group">'+
-                                        '<label>Nombre de Alarma:</label>'+
-                                        '<input id="'+ i +'NameAlarm" class="form-control" type="text" value="' + data._response[i]['AlarmName'] + '"><hr>'+
-                                    '</div>'+
+                                        '<label>Nombre de Alarma: </label> <span id="'+ i +'NameAlarm">' + data._response[i]['AlarmName'] + '</span>'+
+                                    '</div><hr>'+
                                     '<div class="text-right">'+
                                         '<div class="row">'+
                                             '<div class="col-md-6 text-center">';
@@ -398,6 +382,8 @@ var Alarms = {
 
                                 cpu.append(html);
                                 html = "";
+
+                                changeLabelAlarm(i);
 
                             }else if(data._response[i]['Namespace'] == 'AWS/Billing'){
                                 html = '<div class="well col-md-4 init">'+
@@ -501,7 +487,7 @@ var Alarms = {
     },
     refresh: function () {
         Alarms.load();
-        setTimeout(function () {
+        setTimeout(function(){
             Alarms.refresh();
             Alarms.history();
         }, 100000);
@@ -579,7 +565,14 @@ var Instances = {
 };
 
 function showModal(context){
-    $('.contex-text').text(context);
+    var footer = $("<button/>",{
+        class: 'btn btn-primary',
+        'data-dismiss': 'modal',
+        type: 'button'
+    }).html("Aceptar");
+
+    $('#myModal .modal-footer').html(footer);
+    $('#myModal .contex-text').text(context);
     $('#myModal').modal('show');
 }
 
@@ -594,6 +587,27 @@ $(function () {
         }
     });
 
+    uget({
+        url: LinkServer.Url('sns', 'get')
+    }).done(function (data) {
+        var sw = 'none';
+        var sw2 = 'block';
+        if(data._code === 200) {
+            var listEmails = data._response;
+            if(listEmails.length >= 1){
+                sw = 'block';
+                sw2 = 'none';
+
+                Alarms.refresh();
+                Instances.load();
+            }
+        }
+
+        if(sw === 'none'){ createSnsMessage(); }
+        $('#alarms-page').css({'display': sw});
+        $('#sns').css({'display': sw2});
+    });
+
     $("#alarms-page").find(".page-header").append(
         $("<a/>", {
             href: '#',
@@ -606,13 +620,47 @@ $(function () {
             e.preventDefault();
             $('#newAlarmModal').modal('show');
             createNameAlarm();
+            setTimeout(function(){
+                $('#newAlarmModal').find("[id=newThreshold]").focus();
+                console.log('setTimeout');
+            }, 500);
         })
     );
-    
-    Alarms.refresh();
-    Instances.load();
 });
 
+function createSnsMessage(){
+    $('#sns').append(
+        $('<div/>', {
+            class: 'row'
+        }).append(
+            $('<div/>', {
+                class: 'col-lg-12'
+            }).append(
+                $('<h1/>', {
+                    class: 'page-header',
+                    text: 'Configuracion de Alarmas'
+                })
+            )
+        ).append(
+            $('<div/>', {
+                class: 'row'
+            }).append(
+                $('<div/>', {
+                    class: 'col-lg-12'
+                }).append(
+                    $('<div/>', {
+                        class: 'alert alert-info text-center col-md-6 center-block',
+                        role: 'alert'
+                    }).append(
+                        $('<p/>').html(
+                            'Para poder activar sus Alarmas, debe configurar su correo a donde desea recibir todas las notificaciones de las Alarmas. Para configurar su correo haga click <a href="settings.html"><strong>Aqui!</strong></a> y se dirige a la seccion de <strong>correos para Alarmas</strong>.'
+                        )
+                    )
+                )
+            )
+        )
+    );
+}
 
 function logout () {
     uget({
@@ -622,57 +670,82 @@ function logout () {
     });
 }
 
+function valideAlarm(){
+    var error = 0;
+    var field = 0;
+
+    if($('#newThreshold').val() == ''){ error = 1; field = $('#newThreshold'); }
+    if($('#newEvaluationPeriods').val() == ''){ error = 1; field = $('#newEvaluationPeriods'); }
+    if($('#newNameAlarm').val() == ''){ error = 1; field = $('#newNameAlarm'); }
+
+	if(error == 1){
+        alert('Todos los campos son requeridos.');
+		field.focus();
+    }else{
+        var metric = $('#newMetricName option:selected').val();
+        if(metric == 'CPUUtilization'){
+            var porc = parseInt($('#newThreshold').val());
+            if(porc < 1){
+                alert('El porcentaje no debe ser menor al 1%');
+                $('#newThreshold').focus();
+                return;
+            }else if(porc > 100){
+                alert('El porcentaje no debe ser mayor al 100%');
+                $('#newThreshold').focus();
+                return;
+            }            
+        }
+        
+        createAlarm();
+    }
+}
+
 function createAlarm(){
-	if($('#newThreshold').val() != ''){
-		var op = $('#newSelectAlarm option:selected').val();
-	    var ok = "";
-	    var alarm = "";
-	    var ins = "";
+    var op = $('#newSelectAlarm option:selected').val();
+    var ok = "";
+    var alarm = "";
+    var ins = "";
 
-	    switch(op){
-	        case "ALARM":
-	            alarm = $('#newActionAlarm option:selected').val();
-	            break;
-	        case "OK":
-	            ok = $('#newActionAlarm option:selected').val();
-	            break;
-	        case "INSUFFICIENT_DATA":
-	            ins = $('#newActionAlarm option:selected').val();
-	            break;
-	    }
+    switch(op){
+        case "ALARM":
+            alarm = $('#newActionAlarm option:selected').val();
+            break;
+        case "OK":
+            ok = $('#newActionAlarm option:selected').val();
+            break;
+        case "INSUFFICIENT_DATA":
+            ins = $('#newActionAlarm option:selected').val();
+            break;
+    }
 
-	    var post = {
-	        'AlarmName': $('#newNameAlarm').val(),
-	        'OKActions': ok,
-	        'AlarmActions': alarm,
-	        'InsufficientDataActions': ins,
-	        'MetricName': $('#newMetricName option:selected').val(),
-	        'Statistic': $('#newStatistic option:selected').val(),
-	        'InstanceId': $('#listInstances option:selected').val(),
-	        'Period': $('#newPeriod option:selected').val(),
-	        'EvaluationPeriods': $('#newEvaluationPeriods').val(),
-	        'Threshold': $('#newThreshold').val(),
-	        'ComparisonOperator': $('#newComparisonOperator option:selected').val()
-	    }
+    var post = {
+        'AlarmName': $('#newNameAlarm').val(),
+        'OKActions': ok,
+        'AlarmActions': alarm,
+        'InsufficientDataActions': ins,
+        'MetricName': $('#newMetricName option:selected').val(),
+        'Statistic': $('#newStatistic option:selected').val(),
+        'InstanceId': $('#listInstances option:selected').val(),
+        'Period': $('#newPeriod option:selected').val(),
+        'EvaluationPeriods': $('#newEvaluationPeriods').val(),
+        'Threshold': $('#newThreshold').val(),
+        'ComparisonOperator': $('#newComparisonOperator option:selected').val()
+    }
 
-	    uget({
-	        url : LinkServer.Url('alarm', 'add'),
-	        type: 'POST',
-	        data: post
-	    }).done(function (data) {
-	        if(data._code === 200) {
-	            $('#newThreshold').val('');
-	            $('#newAlarmModal').modal('hide');
-	            Alarms.refresh();
-	            showModal('La alarma fue creada con exito');
-	        }else{
-	            showModal('La alarma no fue creada.');
-	        }
-	    });
-	}else{
-		alert('El campo de porcentaje es requerido');
-		$('#newThreshold').focus();
-	}
+    uget({
+        url : LinkServer.Url('alarm', 'add'),
+        type: 'POST',
+        data: post
+    }).done(function (data) {
+        if(data._code === 200) {
+            $('#newThreshold').val('');
+            $('#newAlarmModal').modal('hide');
+            Alarms.refresh();
+            showModal('La alarma fue creada con exito.');
+        }else{
+            showModal('La alarma no fue creada.');
+        }
+    });
 }
 
 function editAlarm(iterator){
@@ -696,7 +769,7 @@ function editAlarm(iterator){
     }
 
     var post = {
-        'AlarmName': $('#'+ iterator +'NameAlarm').val(),
+        'AlarmName': $('#'+ iterator +'NameAlarm').text(),
         'OKActions': ok,
         'AlarmActions': alarm,
         'InsufficientDataActions': ins,
@@ -742,12 +815,12 @@ function modalOk(method, others){
     }
 
     $('#myModal').modal('hide');
-    restoreModal();
+    // restoreModal();
 }
 
-function restoreModal(){
-	$('#myModal .modal-footer').html('<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>');
-}
+// function restoreModal(){
+// 	$('#myModal .modal-footer').html('<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>');
+// }
 
 function AlarmDelete (name) {
 	modalConfirm('Realmente deseas eliminar esta Alarma?','deleteInstance', name);
@@ -763,7 +836,7 @@ function createNameAlarm() {
     console.log(str);
 
     if(metric == 'CPUUtilization'){
-        str2 = "Porcentaje:";
+        str2 = "Porcentaje (%):";
     }else if(metric == '' || metric == 'DiskReadBytes' || metric == 'NetworkOut' || metric == 'NetworkIn'){
         str2 = "Bytes:";
     }else if(metric == 'DiskReadOps' || metric == 'DiskWriteBytes'){
@@ -779,7 +852,7 @@ function changeLabelAlarm(iterator) {
     var metric = $( "#" + iterator + "MetricName option:selected" ).val();
 
     if(metric == 'CPUUtilization'){
-        str2 = "Porcentaje:";
+        str2 = "Porcentaje (%):";
     }else if(metric == '' || metric == 'DiskReadBytes' || metric == 'NetworkOut' || metric == 'NetworkIn'){
         str2 = "Bytes:";
     }else if(metric == 'DiskReadOps' || metric == 'DiskWriteBytes'){

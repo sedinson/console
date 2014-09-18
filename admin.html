@@ -101,6 +101,7 @@
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Nombre</th>
+                                                <th>Email</th>
                                                 <td><b>Secret Key</b></td>
                                                 <td><b>Access Key</b></td>
                                                 <td><b>Eliminar</b></td>
@@ -113,9 +114,10 @@
                                             <tr>
                                                 <td><input type="text" class="form-control" name="idaccount" placeholder="ID" /></td>
                                                 <td><input type="text" class="form-control" name="name" placeholder="Nombre" /></td>
+                                                <td><input type="email" class="form-control" name="email" placeholder="email" /></td>
                                                 <td><input type="text" class="form-control" name="secretkey" placeholder="Secret Key" /></td>
                                                 <td><input type="text" class="form-control" name="accesskey" placeholder="Access Key" /></td>
-                                                <td><input type="submit" class="form-control" value="Agregar" /></td>
+                                                <td><input type="submit" class="btn-info form-control" value="Agregar" /></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -155,7 +157,7 @@
                                                 <td><input type="text" class="form-control" name="name" placeholder="Nombre" /></td>
                                                 <td><select class="form-control idaccount" name="idaccount"></select></td>
                                                 <td><input type="password" class="form-control" name="pass" placeholder="Clave" /></td>
-                                                <td><input type="submit" class="form-control" value="Agregar" /></td>
+                                                <td><input type="submit" class="btn-info form-control" value="Agregar" /></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -229,9 +231,24 @@
                     url: LinkServer.Url('account', 'register'),
                     data: params
                 }).done(function (data) {
-                    if(data._code === 200) {
-                        showModal("Cuenta agregada!");
-                        Accounts.load();
+                    if(data._code === 200){
+                        var email = this.email.value;
+                        var AccountId = this.idaccount.value;
+                        uget({
+                            type: 'POST',
+                            url: LinkServer.Url('sns', 'subscribe'),
+                            data: {
+                                'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
+                                'Endpoint': email
+                            }
+                        }).done(function (data) {
+                            if(data._code != 200) {
+                                showModal("No se pudo subscribir el correo: " + email);
+                            } else {
+                                showModal("Cuenta agregada!");
+                                Accounts.load();
+                            }
+                        });
                     } else {
                         showModal(data._message);
                     }
@@ -258,7 +275,14 @@
         });
 
         function showModal(context){
-            $('.contex-text').text(context);
+            var footer = $("<button/>",{
+                    class: 'btn btn-primary',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Aceptar");
+
+            $('#myModal .modal-footer').html(footer);
+            $('#myModal .contex-text').text(context);
             $('#myModal').modal('show');
         }
         
@@ -303,23 +327,35 @@
                                     html: d.name
                                 })
                             ).append(
-                                $("<td/>").html(
+                                $("<td/>", {
+                                    html: d.email
+                                })
+                            ).append(
+                                $("<td/>", {
+                                    class: 'text-center'
+                                }).html(
                                     $("<a/>", {
-                                        html: d.secretkey,
-                                        href: 'javascript: Accounts.change.secret(' + d.idaccount + ')'
+                                        html: '<i class="glyphicon glyphicon-edit"></i> Cambiar',
+                                        // html: d.secretkey,
+                                        href: 'javascript: Accounts.change.secret(' + d.idaccount + ', \'' + d.secretkey + '\')'
                                     })
                                 )
                             ).append(
-                                $("<td/>").html(
+                                $("<td/>", {
+                                    class: 'text-center'
+                                }).html(
                                     $("<a/>", {
-                                        html: d.accesskey,
-                                        href: 'javascript: Accounts.change.access(' + d.idaccount + ')'
+                                        html: '<i class="glyphicon glyphicon-edit"></i> Cambiar',
+                                        // html: d.accesskey,
+                                        href: 'javascript: Accounts.change.access(' + d.idaccount + ', \'' + d.accesskey + '\')'
                                     })
                                 )
                             ).append(
-                                $("<td/>").html(
+                                $("<td/>", {
+                                    class: 'text-center'
+                                }).html(
                                     $("<a/>", {
-                                        html: 'eliminar',
+                                        html: '<i class="glyphicon glyphicon-trash"></i> Eliminar',
                                         class: 'red',
                                         href: 'javascript: Accounts.delete(' + d.idaccount + ')'
                                     })
@@ -339,63 +375,182 @@
                 });
             },
             change: {
-                secret: function (id) {
-                    var code = prompt("Escriba la nueva clave");
+                secret: function (id, key) {
+                    var form = $("<div />",{
+                        role: 'form'
+                    });
+                    
+                    var div = $('<div/>', {
+                        class: 'form-group'
+                    });
 
-                    if(code.length > 0) {
-                        uget({
-                            type: 'PUT',
-                            url: LinkServer.Url('account', 'update'),
-                            data: {
-                                idaccount: id,
-                                secretkey: code
-                            }
-                        }).done(function (data) {
-                            if(data._code != 200) {
-                                showModal("No se pudo cambiar la clave de la cuenta: " + data._message);
-                            } else {
-                                showModal("Clave cambiada");
-                                Accounts.load();
-                            }
-                        });
-                    }
-                }, access: function (id) {
-                    var code = prompt("Escriba la nueva clave");
+                    $("<label/>")
+                        .html("Escriba la nueva clave:")
+                        .appendTo(div);
 
-                    if(code.length > 0) {
-                        uget({
-                            type: 'PUT',
-                            url: LinkServer.Url('account', 'update'),
-                            data: {
-                                idaccount: id,
-                                accesskey: code
-                            }
-                        }).done(function (data) {
-                            if(data._code != 200) {
-                                showModal("No se pudo cambiar la clave de la cuenta: " + data._message);
-                            } else {
-                                showModal("Clave cambiada");
-                                Accounts.load();
-                            }
-                        });
-                    }
+                    $("<input/>", {
+                        class: 'form-control',
+                        type: "text",
+                        name: "clave",
+                        value: key
+                    }).appendTo(div);
+
+                    div.appendTo(form);
+
+                    var footer = $("<div />");
+
+                    $("<button/>",{
+                        class: 'btn btn-default',
+                        'data-dismiss': 'modal',
+                        type: 'button'
+                    }).html("Cancelar").appendTo(footer);
+
+                    $("<button/>",{
+                        class: 'btn btn-primary',
+                        type: 'button'
+                    }).click(function(){
+                        var clave = $('#myModal .contex-text').find("[name=clave]").val();
+                        if(clave.length > 0) {
+                            uget({
+                                type: 'PUT',
+                                url: LinkServer.Url('account', 'update'),
+                                data: {
+                                    idaccount: id,
+                                    secretkey: clave
+                                }
+                            }).done(function (data) {
+                                if(data._code != 200) {
+                                    showModal("No se pudo cambiar la clave de la cuenta: " + data._message);
+                                } else {
+                                    showModal("Clave cambiada");
+                                    Accounts.load();
+                                }
+                            });
+                            $('#myModal').modal('hide');
+                        }else{
+                            alert('Debe introducir una nueva clave.');
+                            $('#myModal .contex-text').find("[name=clave]").focus();
+                        }
+                    }).html('Aceptar').appendTo(footer);
+
+                    $('#myModal .modal-title').html('Editar Clave de la cuenta');
+                    $('#myModal .contex-text').html(form);
+                    $('#myModal .modal-footer').html(footer);
+                    $('#myModal').modal('show');
+
+                    setTimeout(function(){
+                        $('#myModal .contex-text').find("[name=clave]").focus();
+                        console.log('setTimeout');
+                    }, 700);
+                },
+                access: function (id, key) {
+                    var form = $("<div />",{
+                        role: 'form'
+                    });
+                    
+                    var div = $('<div/>', {
+                        class: 'form-group'
+                    });
+
+                    $("<label/>")
+                        .html("Escriba la nueva clave:")
+                        .appendTo(div);
+
+                    $("<input/>", {
+                        class: 'form-control',
+                        type: "text",
+                        name: "clave",
+                        value: key
+                    }).appendTo(div);
+
+                    div.appendTo(form);
+
+                    var footer = $("<div />");
+
+                    $("<button/>",{
+                        class: 'btn btn-default',
+                        'data-dismiss': 'modal',
+                        type: 'button'
+                    }).html("Cancelar").appendTo(footer);
+
+                    $("<button/>",{
+                        class: 'btn btn-primary',
+                        type: 'button'
+                    }).click(function(){
+                        var clave = $('#myModal .contex-text').find("[name=clave]").val();
+                        if(clave.length > 0) {
+                            uget({
+                                type: 'PUT',
+                                url: LinkServer.Url('account', 'update'),
+                                data: {
+                                    idaccount: id,
+                                    accesskey: clave
+                                }
+                            }).done(function (data) {
+                                if(data._code != 200) {
+                                    showModal("No se pudo cambiar la clave de la cuenta: " + data._message);
+                                } else {
+                                    showModal("Clave cambiada");
+                                    Accounts.load();
+                                }
+                            });
+                            $('#myModal').modal('hide');
+                        }else{
+                            alert('Debe introducir una nueva clave.');
+                            $('#myModal .contex-text').find("[name=clave]").focus();
+                        }
+                    }).html('Aceptar').appendTo(footer);
+
+                    $('#myModal .modal-title').html('Editar Clave de la cuenta');
+                    $('#myModal .contex-text').html(form);
+                    $('#myModal .modal-footer').html(footer);
+                    $('#myModal').modal('show');
+
+                    setTimeout(function(){
+                        $('#myModal .contex-text').find("[name=clave]").focus();
+                        console.log('setTimeout');
+                    }, 700);
                 }
             },
             delete: function (id) {
-                uget({
-                    type: 'DELETE',
-                    url: LinkServer.Url('account', 'delete'),
-                    data: {
-                        idaccount: id
-                    }
-                }).done(function (data) {
-                    if(data._code != 200) {
-                        showModal("No se pudo eliminar la cuenta: " + data._message);
-                    } else {
-                        showModal("Usuario eliminado");
-                        Accounts.load();
-                    }
-                });
+                var footer = $("<div />");
+
+                $("<button/>",{
+                    class: 'btn btn-default',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Cancelar").appendTo(footer);
+
+                $("<button/>",{
+                    class: 'btn btn-danger',
+                    type: 'button'
+                }).click(function(){
+                    uget({
+                        type: 'DELETE',
+                        url: LinkServer.Url('account', 'delete'),
+                        data: {
+                            idaccount: id
+                        }
+                    }).done(function (data) {
+                        if(data._code != 200) {
+                            showModal("No se pudo eliminar la cuenta: " + data._message);
+                        } else {
+                            showModal("Cuenta eliminada");
+                            Accounts.load();
+                        }
+                    });
+                    $('#myModal').modal('hide');
+                }).html('<i class="glyphicon glyphicon-trash"></i> Eliminar').appendTo(footer);
+
+                $('#myModal .modal-title').html('Eliminar Cuenta');
+                $('#myModal .contex-text').html('<p>Desea eliminar esta Cuenta?</p>');
+                $('#myModal .modal-footer').html(footer);
+                $('#myModal').modal('show');
+
+                setTimeout(function(){
+                    $('#myModal .btn-danger').focus();
+                    console.log('setTimeout');
+                }, 700);
             }
         };
         
@@ -423,16 +578,20 @@
                                     html: Accounts.info[d.idaccount]
                                 })
                             ).append(
-                                $("<td/>").html(
+                                $("<td/>", {
+                                    class: 'text-center'
+                                }).html(
                                     $("<a/>", {
-                                        html: 'Cambiar',
+                                        html: '<i class="glyphicon glyphicon-edit"></i> Cambiar',
                                         href: 'javascript: Users.change.pass(' + d.iduser + ')'
                                     })
                                 )
                             ).append(
-                                $("<td/>").html(
+                                $("<td/>", {
+                                    class: 'text-center'
+                                }).html(
                                     $("<a/>", {
-                                        html: 'eliminar',
+                                        html: '<i class="glyphicon glyphicon-trash"></i> Eliminar',
                                         class: 'red',
                                         href: 'javascript: Users.delete(' + d.iduser + ')'
                                     })
@@ -451,42 +610,112 @@
             },
             change: {
                 pass: function (id) {
-                    var code = prompt("Escriba la nueva clave");
+                    var form = $("<div />",{
+                        role: 'form'
+                    });
+                    
+                    var div = $('<div/>', {
+                        class: 'form-group'
+                    });
 
-                    if(code.length > 0) {
-                        uget({
-                            type: 'POST',
-                            url: LinkServer.Url('user', 'cpw'),
-                            data: {
-                                iduser: id,
-                                new: code
-                            }
-                        }).done(function (data) {
-                            if(data._code != 200) {
-                                showModal("No se pudo cambiar la clave de la cuenta: " + data._message);
-                            } else {
-                                showModal("Clave cambiada");
-                                Accounts.load();
-                            }
-                        });
-                    }
+                    $("<label/>")
+                        .html("Escriba la nueva clave:")
+                        .appendTo(div);
+
+                    $("<input/>", {
+                        class: 'form-control',
+                        type: "password",
+                        name: "clave"
+                    }).appendTo(div);
+
+                    div.appendTo(form);
+
+                    var footer = $("<div />");
+
+                    $("<button/>",{
+                        class: 'btn btn-default',
+                        'data-dismiss': 'modal',
+                        type: 'button'
+                    }).html("Cancelar").appendTo(footer);
+
+                    $("<button/>",{
+                        class: 'btn btn-primary',
+                        type: 'button'
+                    }).click(function(){
+                        var clave = $('#myModal .contex-text').find("[name=clave]").val();
+                        if(clave.length > 0) {
+                            uget({
+                                type: 'POST',
+                                url: LinkServer.Url('user', 'cpw'),
+                                data: {
+                                    iduser: id,
+                                    new: clave
+                                }
+                            }).done(function (data) {
+                                if(data._code != 200) {
+                                    showModal("No se pudo cambiar la clave del usuario: " + data._message);
+                                } else {
+                                    showModal("Clave cambiada");
+                                    Accounts.load();
+                                }
+                            });
+                            $('#myModal').modal('hide');
+                        }else{
+                            alert('Debe introducir una nueva clave.');
+                            $('#myModal .contex-text').find("[name=clave]").focus();
+                        }
+                    }).html('Aceptar').appendTo(footer);
+
+                    $('#myModal .modal-title').html('Editar Clave de usuario');
+                    $('#myModal .contex-text').html(form);
+                    $('#myModal .modal-footer').html(footer);
+                    $('#myModal').modal('show');
+
+                    setTimeout(function(){
+                        $('#myModal .contex-text').find("[name=clave]").focus();
+                        console.log('setTimeout');
+                    }, 700);
                 }
             },
             delete: function (id) {
-                uget({
-                    type: 'DELETE',
-                    url: LinkServer.Url('user', 'delete'),
-                    data: {
-                        iduser: id
-                    }
-                }).done(function (data) {
-                    if(data._code != 200) {
-                        showModal("No se pudo eliminar el usuario: " + data._message);
-                    } else {
-                        showModal("Usuario eliminado");
-                        Users.load();
-                    }
-                });
+                var footer = $("<div />");
+
+                $("<button/>",{
+                    class: 'btn btn-default',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Cancelar").appendTo(footer);
+
+                $("<button/>",{
+                    class: 'btn btn-danger',
+                    type: 'button'
+                }).click(function(){                    
+                    uget({
+                        type: 'DELETE',
+                        url: LinkServer.Url('user', 'delete'),
+                        data: {
+                            iduser: id
+                        }
+                    }).done(function (data) {
+                        if(data._code != 200) {
+                            showModal("No se pudo eliminar el usuario: " + data._message);
+                        } else {
+                            showModal("Usuario eliminado");
+                            Users.load();
+                        }
+                    });
+                    $('#myModal').modal('hide');
+                }).html('<i class="glyphicon glyphicon-trash"></i> Eliminar').appendTo(footer);
+
+                $('#myModal .modal-title').html('Eliminar Usuario');
+                $('#myModal .contex-text').html('<p>Desea eliminar este Usuario?</p>');
+                $('#myModal .modal-footer').html(footer);
+                $('#myModal').modal('show');
+
+                setTimeout(function(){
+                    $('#myModal .btn-danger').focus();
+                    console.log('setTimeout');
+                }, 700);
             }
         };
     </script>

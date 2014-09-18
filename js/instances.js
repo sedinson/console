@@ -265,7 +265,14 @@ var Instances = {
 };
 
 function showModal(context){
-    $('.contex-text').text(context);
+    var footer = $("<button/>",{
+        class: 'btn btn-primary',
+        'data-dismiss': 'modal',
+        type: 'button'
+    }).html("Aceptar");
+
+    $('#myModal .modal-footer').html(footer);
+    $('#myModal .contex-text').text(context);
     $('#myModal').modal('show');
 }
 

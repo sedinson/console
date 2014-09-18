@@ -119,6 +119,7 @@
                     </div>
                 </div>
             </div>
+            <div id="sns"></div>
         </div>
         <!-- /#page-wrapper -->
 
@@ -161,18 +162,18 @@
                                     <option value="Minimum">Minimo</option>
                                     <option value="Maximum">Maximo</option>
                                     <option value="Sum">Total</option>
-                                    <option value="SampleCount">SampleCount</option>
+                                    <!-- <option value="SampleCount">Datos Simples</option> -->
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label>De:</label>
                                 <select id="newMetricName" onchange="createNameAlarm()" class="form-control">
                                     <option value="CPUUtilization">Consumo de CPU</option>
-                                    <option value="NetworkOut">Transferencia de Datos de Salida</option>
+                                    <!-- <option value="NetworkOut">Transferencia de Datos de Salida</option>
                                     <option value="DiskReadBytes">Operaciones Lectura Disco en Bytes</option>
                                     <option value="DiskReadOps">Operaciones Lectura Disco</option>
                                     <option value="DiskWriteBytes">Operaciones Escritura Disco en Bytes</option>
-                                    <option value="NetworkIn">Transferencia de Datos de Entrada</option>
+                                    <option value="NetworkIn">Transferencia de Datos de Entrada</option> -->
                                 </select>
                             </div>
                         </div>
@@ -180,7 +181,7 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
-                                <label>Es:</label>
+                                <label>Con la condición de que:</label>
                                 <select id="newComparisonOperator" class="form-control">
                                     <option value="GreaterThanThreshold">></option>
                                     <option value="GreaterThanOrEqualToThreshold">>=</option>
@@ -189,15 +190,15 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label id="changeLabelForm">Porcentaje:</label>
-                                <input autofocus id="newThreshold" class="form-control" type="text">
+                                <label id="changeLabelForm">Porcentaje (%):</label>
+                                <input id="newThreshold" class="form-control" type="text">
                             </div>
                         </div>  
                     </div>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
-                                <label>Por lo menos:</label>
+                                <label>Durante por lo menos (Ciclos):</label>
                                 <input id="newEvaluationPeriods" class="form-control" type="text" value="1">
                             </div>
                             <div class="col-md-6">
@@ -215,27 +216,27 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
-                                <label>Realice la acción:</label>
+                                <label>Realice la acción de:</label>
                                 <fieldset id="changeCombox">
                                     <select id="newActionAlarm" class="form-control">
-                                        <option value="arn:aws:automate:us-east-1:ec2:stop">Detener la instacia</option>
-                                        <option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar la instacia</option>
-                                        <option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme</option>
+                                        <option value="arn:aws:automate:us-east-1:ec2:stop">Detener el Servidor</option>
+                                        <!-- <option value="arn:aws:automate:us-east-1:ec2:terminate">Terminar el Servidor</option> -->
+                                        <option selected value="arn:aws:sns:us-east-1:482407636571:NotifyMe">Notificarme por Correo</option>
                                     </select>
                                 </fieldset>
                             </div>
                             <div class="col-md-6">
-                                <label>Cuando esta alarma:</label>
+                                <label>Cuando este en estado de:</label>
                                 <select id="newSelectAlarm" class="form-control">
                                     <option value="ALARM">Estado de Alarma</option>
                                     <option value="OK">Estado Ok</option>
-                                    <option value="INSUFFICIENT_DATA">Estado Insuficiente</option>
+                                    <!-- <option selected value="INSUFFICIENT_DATA">Estado Insuficiente</option> -->
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Instancia:</label>
+                        <label>En el servidor de:</label>
                         <select id="listInstances" class="form-control" onchange="createNameAlarm()"></select>
                     </div>
                     <div class="form-group">
@@ -245,7 +246,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                        <button onclick="createAlarm()" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>
+                    <button onclick="valideAlarm()" type="button" class="btn btn-success"><i class="glyphicon glyphicon-dashboard"></i> Crear Alarma</button>
                 </div>
             </div>
         </div>

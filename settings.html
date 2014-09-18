@@ -74,8 +74,10 @@
                             </div>
                             <!-- /input-group -->
                         </li>
-                        <li>
-                            <a href="welcome.html"><i class="fa fa-dashboard fa-fw"></i> Instancias</a>
+                        <li>                            
+                            <!-- <a href="dashboard.html"><i class="glyphicon glyphicon-dashboard"></i> Dashboard</a> -->
+                            <a href="welcome.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Servidores</a>
+                            <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
                     <!-- /#side-menu -->
@@ -92,7 +94,7 @@
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Usuarios que ven mis instancias
+                            Usuarios que ven los servidores
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -115,9 +117,37 @@
                                                 <td><input type="text" class="form-control" name="user" placeholder="Usuario" /></td>
                                                 <td><input type="text" class="form-control" name="name" placeholder="Nombre" /></td>
                                                 <td><input type="password" class="form-control" name="pass" placeholder="Clave" /></td>
-                                                <td><input type="submit" class="form-control" value="Agregar" /></td>
+                                                <td><input type="submit" class="btn-info form-control" value="Agregar" /></td>
                                             </tr>
                                         </tfoot>
+                                    </table>
+                                </div>
+                                <!-- /.table-responsive -->
+                            </form>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Correo(s) para Alarmas
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <form role="form">
+                                <div class="table-responsive">
+                                    <table id="emailList" class="table tablesorter table-striped table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Email</th>
+                                                <td><b>Editar</b></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot></tfoot>
                                     </table>
                                 </div>
                                 <!-- /.table-responsive -->
@@ -170,9 +200,17 @@
     
     <script>
         var first = true;
+        var AccountId = null;
 
         function showModal(context){
-            $('.contex-text').text(context);
+            var footer = $("<button/>",{
+                    class: 'btn btn-primary',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Aceptar");
+
+            $('#myModal .modal-footer').html(footer);
+            $('#myModal .contex-text').text(context);
             $('#myModal').modal('show');
         }
         
@@ -195,16 +233,20 @@
                                 html: d.name
                             })
                         ).append(
-                            $("<td/>").html(
+                            $("<td/>",{
+                                class: 'text-center'
+                            }).html(
                                 $("<a/>", {
-                                    html: 'cambiar',
+                                    html: '<i class="glyphicon glyphicon-edit"></i> Editar',
                                     href: 'javascript: user.change(' + d.iduser + ')'
                                 })
                             )
                         ).append(
-                            $("<td/>").html(
+                            $("<td/>",{
+                                class: 'text-center'
+                            }).html(
                                 $("<a/>", {
-                                    html: 'eliminar',
+                                    html: '<i class="glyphicon glyphicon-trash"></i> Eliminar',
                                     class: 'red',
                                     href: 'javascript: user.delete(' + d.iduser + ')'
                                 })
@@ -230,6 +272,129 @@
                     logout();
                 } else {
                     loadUsers();
+                    AccountId = data._response.idaccount;
+                }
+            });
+
+            uget({
+                url: LinkServer.Url('sns', 'get')
+            }).done(function (data) {
+                if(data._code === 200) {
+                    var listEmails = data._response;
+                    if(listEmails.length >= 1){
+                        for (var i = 0; i <= listEmails.length - 1; i++){
+                            var tr = $('<tr/>');
+
+                            $('<td/>')
+                                .html(listEmails[i]['Endpoint'])
+                                .appendTo(tr);
+
+                            $('<td/>', {
+                                    class: 'text-center'
+                            }).html(
+                                $('<a/>').css({
+                                    cursor: 'pointer'
+                                }).html(
+                                    '<i class="glyphicon glyphicon-edit"></i> Editar'
+                                ).click(function(){
+                                    var form = $("<div />",{
+                                        role: 'form'
+                                    });
+                                    
+                                    var div = $('<div/>', {
+                                        class: 'form-group'
+                                    });
+
+                                    $("<label/>")
+                                        .html("Email:")
+                                        .appendTo(div);
+
+                                    $("<input/>", {
+                                        class: 'form-control',
+                                        type: "email",
+                                        name: "email"
+                                    }).appendTo(div);
+
+                                    div.appendTo(form);
+
+                                    var footer = $("<div />");
+
+                                    $("<button/>",{
+                                        class: 'btn btn-default',
+                                        'data-dismiss': 'modal',
+                                        type: 'button'
+                                    }).html("Cancelar").appendTo(footer);
+
+                                    $("<button/>",{
+                                        class: 'btn btn-primary',
+                                        type: 'button'
+                                    }).click(function(){
+                                        var email = $('#myModal .contex-text').find("[name=email]");
+
+                                        $('#myModal').modal('hide');
+                                    }).html('Aceptar').appendTo(footer);
+
+                                    $('#myModal .modal-title').html('Agregar Correo para Alarmas');
+                                    $('#myModal .contex-text').html(form);
+                                    $('#myModal .modal-footer').html(footer);
+                                    $('#myModal').modal('show');
+
+                                    setTimeout(function(){
+                                        $('#myModal .contex-text').find("[name=email]").focus();
+                                        console.log('setTimeout');
+                                    }, 700);
+                                })
+                            ).appendTo(tr);
+
+                            $('#emailList tbody').append(tr);
+                        }
+                        $('#emailList tfoot').html('');
+                    }else{
+                        $('#emailList tfoot').html('');
+                        var tr = $('<tr/>');
+
+                        $('<td/>').html(
+                            $('<input/>', {
+                                class: 'form-control',
+                                id: 'newEmailForList',
+                                name: 'email',
+                                type: 'email',
+                                placeholder: 'Email'
+                            })
+                        ).appendTo(tr);
+
+                        $('<td/>').html(
+                            $('<button/>',{
+                                class: 'btn-info form-control',
+                                name: 'email',
+                                type: 'button',
+                                placeholder: 'Email',
+                                text: 'Agregar'
+                            }).click(function(){
+                                var email = $('#newEmailForList').val();
+                                if(email != ''){
+                                    uget({
+                                        type: 'POST',
+                                        url: LinkServer.Url('sns', 'subscribe'),
+                                        data: {
+                                            'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
+                                            'Endpoint': email
+                                        }
+                                    }).done(function (data) {
+                                        if(data._code != 200) {
+                                            showModal("No se pudo subscribir el correo: " + email);
+                                        } else {
+                                            showModal("Correo suscrito exitosamente.");
+                                        }
+                                    });
+                                }else{
+                                    showModal("Debe rellenar el campo!");
+                                }
+                            })
+                        ).appendTo(tr);
+
+                        $('#emailList tfoot').append(tr);
+                    }
                 }
             });
             
@@ -262,40 +427,110 @@
         
         var user = {
             change: function (id) {
-                var pass_new = prompt("Escriba la nueva clave");
+                var form = $("<div />",{
+                    role: 'form'
+                });
                 
-                if(pass_new.length > 0) {
-                    uget({
-                        type: 'POST',
-                        url: LinkServer.Url('user', 'cpw'),
-                        data: {
-                            iduser: id,
-                            new: pass_new
-                        }
-                    }).done(function (data) {
-                        if(data._code != 200) {
-                            showModal("No se pudo cambiar la clave del usuario: " + data._message);
-                        } else {
-                            showModal("Clave cambiada");
-                        }
-                    });
-                }
+                var div = $('<div/>', {
+                    class: 'form-group'
+                });
+
+                $("<label/>")
+                    .html("Escriba la nueva clave:")
+                    .appendTo(div);
+
+                $("<input/>", {
+                    class: 'form-control',
+                    type: "password",
+                    name: "clave"
+                }).appendTo(div);
+
+                div.appendTo(form);
+
+                var footer = $("<div />");
+
+                $("<button/>",{
+                    class: 'btn btn-default',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Cancelar").appendTo(footer);
+
+                $("<button/>",{
+                    class: 'btn btn-primary',
+                    type: 'button'
+                }).click(function(){
+                    var clave = $('#myModal .contex-text').find("[name=clave]").val();
+                    if(clave.length > 0) {
+                        uget({
+                            type: 'POST',
+                            url: LinkServer.Url('user', 'cpw'),
+                            data: {
+                                iduser: id,
+                                new: clave
+                            }
+                        }).done(function (data) {
+                            if(data._code != 200) {
+                                showModal("No se pudo cambiar la clave del usuario: " + data._message);
+                            } else {
+                                showModal("Clave cambiada");
+                            }
+                        });
+                        $('#myModal').modal('hide');
+                    }else{
+                        alert('Debe introducir una nueva clave.');
+                        $('#myModal .contex-text').find("[name=clave]").focus();
+                    }
+                }).html('Aceptar').appendTo(footer);
+
+                $('#myModal .modal-title').html('Editar Clave de usuario');
+                $('#myModal .contex-text').html(form);
+                $('#myModal .modal-footer').html(footer);
+                $('#myModal').modal('show');
+
+                setTimeout(function(){
+                    $('#myModal .contex-text').find("[name=clave]").focus();
+                    console.log('setTimeout');
+                }, 700);
             },
             delete: function (id) {
-                uget({
-                    type: 'DELETE',
-                    url: LinkServer.Url('user', 'delete'),
-                    data: {
-                        iduser: id
-                    }
-                }).done(function (data) {
-                    loadUsers();
-                    if(data._code != 200) {
-                        showModal("No se pudo eliminar el usuario: " + data._message);
-                    } else {
-                        showModal("Usuario eliminado");
-                    }
-                });
+                var footer = $("<div />");
+
+                $("<button/>",{
+                    class: 'btn btn-default',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Cancelar").appendTo(footer);
+
+                $("<button/>",{
+                    class: 'btn btn-danger',
+                    type: 'button'
+                }).click(function(){
+                    uget({
+                        type: 'DELETE',
+                        url: LinkServer.Url('user', 'delete'),
+                        data: {
+                            iduser: id
+                        }
+                    }).done(function (data) {
+                        loadUsers();
+                        if(data._code != 200) {
+                            showModal("No se pudo eliminar el usuario: " + data._message);
+                        } else {
+                            showModal("Usuario eliminado");
+                        }
+                    });
+                    $('#myModal').modal('hide');
+                }).html('<i class="glyphicon glyphicon-trash"></i> Eliminar').appendTo(footer);
+
+                $('#myModal .modal-title').html('Eliminar Usuario');
+                $('#myModal .contex-text').html('<p>Desea eliminar este Usuario?</p>');
+                $('#myModal .modal-footer').html(footer);
+                $('#myModal').modal('show');
+
+                setTimeout(function(){
+                    $('#myModal .btn-danger').focus();
+                    console.log('setTimeout');
+                }, 700);
             }
         }
     </script>
