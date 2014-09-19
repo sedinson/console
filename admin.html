@@ -238,12 +238,13 @@
                         var Accesskey = $('#newAccesskey').val();
                         uget({
                             type: 'POST',
-                            url: LinkServer.Url('sns', 'subscribe'),
+                            url: LinkServer.Url('snsadmin', 'subscribeAccount'),
                             data: {
+                                'Secretkey': Secretkey,
+                                'Accesskey': Accesskey,
+                                'Name': 'NotifyMe',
                                 'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
                                 'Endpoint': email,
-                                'Secretkey': Secretkey,
-                                'Accesskey': Accesskey
                             }
                         }).done(function (data) {
                             if(data._code != 200) {

@@ -43,7 +43,7 @@
                 <!-- /.dropdown -->
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        <i class="fa fa-user fa-fw"></i> <span id="userName"></span>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="profile.html"><i class="fa fa-user fa-fw"></i> Editar Perfil</a>
@@ -76,7 +76,7 @@
                         </li>
                         <li>
                             <a class="active" href="dashboard.html"><i class="glyphicon glyphicon-dashboard"></i> Dashboard</a>
-                            <a href="welcome.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Instancias</a>
+                            <a href="servidores.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Instancias</a>
                             <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
@@ -210,6 +210,8 @@
             }).done(function (data) {
                 if(data._code !== 200) {
                     logout();
+                }else{
+                    $('#userName').text(data._response['user']);
                 }
             });
         });

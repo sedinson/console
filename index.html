@@ -81,7 +81,7 @@
                 url: LinkServer.Url('user', 'active')
             }).done(function (data) {
                 if(data._code === 200) {
-                    location.href = 'welcome.html';
+                    location.href = 'servidores.html';
                 }
             });
         });
@@ -115,7 +115,7 @@
                 }
             }).done(function (data) {
                 if(data._code === 200) {
-                    location.href = 'welcome.html';
+                    location.href = 'servidores.html';
                 } else {
                     showModal('Usuario o clave inválidos');
                 }

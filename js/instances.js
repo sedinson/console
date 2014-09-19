@@ -384,6 +384,8 @@ $(function () {
     }).done(function (data) {
         if(data._code !== 200) {
             logout();
+        }else{
+            $('#userName').text(data._response['user']);
         }
     });
     

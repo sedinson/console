@@ -43,7 +43,7 @@
                 <!-- /.dropdown -->
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        <i class="fa fa-user fa-fw"></i> <span id="userName"></span>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="profile.html"><i class="fa fa-user fa-fw"></i> Editar Perfil</a>
@@ -76,7 +76,7 @@
                         </li>
                         <li>                            
                             <!-- <a href="dashboard.html"><i class="glyphicon glyphicon-dashboard"></i> Dashboard</a> -->
-                            <a href="welcome.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Servidores</a>
+                            <a href="servidores.html"><i class="glyphicon glyphicon-glyphicon glyphicon-phone"></i> Servidores</a>
                             <a href="alarmas.html"><i class="glyphicon glyphicon-flash"></i> Alarmas</a>
                         </li>
                     </ul>
@@ -202,229 +202,6 @@
         var first = true;
         var AccountId = null;
 
-        function showModal(context){
-            var footer = $("<button/>",{
-                    class: 'btn btn-primary',
-                    'data-dismiss': 'modal',
-                    type: 'button'
-                }).html("Aceptar");
-            $('#myModal .modal-title').html('Console - Soluntech');
-            $('#myModal .modal-footer').html(footer);
-            $('#myModal .contex-text').text(context);
-            $('#myModal').modal('show');
-        }
-        
-        function loadUsers () {
-            uget({
-                url: LinkServer.Url('account', 'users')
-            }).done(function (data) {
-                if(data._code === 200) {
-                    var table = $("#table-users tbody");
-                    table.html("");
-                    
-                    for(var i in data._response) {
-                        var d = data._response[i];
-                        $("<tr/>").append(
-                            $("<td/>", {
-                                html: d.user
-                            })
-                        ).append(
-                            $("<td/>", {
-                                html: d.name
-                            })
-                        ).append(
-                            $("<td/>",{
-                                class: 'text-center'
-                            }).html(
-                                $("<a/>", {
-                                    html: '<i class="glyphicon glyphicon-edit"></i> Editar',
-                                    href: 'javascript: user.change(' + d.iduser + ')'
-                                })
-                            )
-                        ).append(
-                            $("<td/>",{
-                                class: 'text-center'
-                            }).html(
-                                $("<a/>", {
-                                    html: '<i class="glyphicon glyphicon-trash"></i> Eliminar',
-                                    class: 'red',
-                                    href: 'javascript: user.delete(' + d.iduser + ')'
-                                })
-                            )
-                        ).appendTo(table);
-                    }
-                    
-                    if(first) {
-                        $("#table-users").tablesorter();
-                        first = false;
-                    }
-                } else {
-                    showModal("No tienes suficientes permisos para estar en esta seccion.");
-                }
-            });
-        }
-        
-        $(function () {
-            uget({
-                url: LinkServer.Url('user', 'active')
-            }).done(function (data) {
-                if(data._code !== 200) {
-                    logout();
-                } else {
-                    loadUsers();
-                    AccountId = data._response.idaccount;
-                }
-            });
-
-            uget({
-                url: LinkServer.Url('sns', 'get')
-            }).done(function (data) {
-                if(data._code === 200) {
-                    var listEmails = data._response;
-                    if(listEmails.length >= 1){
-                        for (var i = 0; i <= listEmails.length - 1; i++){
-                            var tr = $('<tr/>');
-
-                            $('<td/>')
-                                .html(listEmails[i]['Endpoint'])
-                                .appendTo(tr);
-
-                            $('<td/>', {
-                                    class: 'text-center'
-                            }).html(
-                                $('<a/>').css({
-                                    cursor: 'pointer'
-                                }).html(
-                                    '<i class="glyphicon glyphicon-edit"></i> Editar'
-                                ).click(function(){
-                                    var form = $("<div />",{
-                                        role: 'form'
-                                    });
-                                    
-                                    var div = $('<div/>', {
-                                        class: 'form-group'
-                                    });
-
-                                    $("<label/>")
-                                        .html("Email:")
-                                        .appendTo(div);
-
-                                    $("<input/>", {
-                                        class: 'form-control',
-                                        type: "email",
-                                        name: "email"
-                                    }).appendTo(div);
-
-                                    div.appendTo(form);
-
-                                    var footer = $("<div />");
-
-                                    $("<button/>",{
-                                        class: 'btn btn-default',
-                                        'data-dismiss': 'modal',
-                                        type: 'button'
-                                    }).html("Cancelar").appendTo(footer);
-
-                                    $("<button/>",{
-                                        class: 'btn btn-primary',
-                                        type: 'button'
-                                    }).click(function(){
-                                        var email = $('#myModal .contex-text').find("[name=email]");
-
-                                        $('#myModal').modal('hide');
-                                    }).html('Aceptar').appendTo(footer);
-
-                                    $('#myModal .modal-title').html('Agregar Correo para Alarmas');
-                                    $('#myModal .contex-text').html(form);
-                                    $('#myModal .modal-footer').html(footer);
-                                    $('#myModal').modal('show');
-
-                                    setTimeout(function(){
-                                        $('#myModal .contex-text').find("[name=email]").focus();
-                                        console.log('setTimeout');
-                                    }, 700);
-                                })
-                            ).appendTo(tr);
-
-                            $('#emailList tbody').append(tr);
-                        }
-                        $('#emailList tfoot').html('');
-                    }else{
-                        $('#emailList tfoot').html('');
-                        var tr = $('<tr/>');
-
-                        $('<td/>').html(
-                            $('<input/>', {
-                                class: 'form-control',
-                                id: 'newEmailForList',
-                                name: 'email',
-                                type: 'email',
-                                placeholder: 'Email'
-                            })
-                        ).appendTo(tr);
-
-                        $('<td/>').html(
-                            $('<button/>',{
-                                class: 'btn-info form-control',
-                                name: 'email',
-                                type: 'button',
-                                placeholder: 'Email',
-                                text: 'Agregar'
-                            }).click(function(){
-                                var email = $('#newEmailForList').val();
-                                if(email != ''){
-                                    uget({
-                                        type: 'POST',
-                                        url: LinkServer.Url('sns', 'subscribe'),
-                                        data: {
-                                            'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
-                                            'Endpoint': email
-                                        }
-                                    }).done(function (data) {
-                                        if(data._code != 200) {
-                                            showModal("No se pudo subscribir el correo: " + email);
-                                        } else {
-                                            showModal("Correo suscrito exitosamente.");
-                                        }
-                                    });
-                                }else{
-                                    showModal("Debe rellenar el campo!");
-                                }
-                            })
-                        ).appendTo(tr);
-
-                        $('#emailList tfoot').append(tr);
-                    }
-                }
-            });
-            
-            $("#frm-adduser").submit(function (e) {
-                e.preventDefault();
-                
-                params = parametrizer($(this));
-                uget({
-                    type: 'POST',
-                    url: LinkServer.Url('user', 'register'),
-                    data: params
-                }).done(function (data) {
-                    if(data._code === 200) {
-                        loadUsers();
-                        showModal("Usuario agregado!");
-                    } else {
-                        showModal(data._message);
-                    }
-                });
-            });
-        });
-        
-        function logout () {
-            uget({
-                url     : LinkServer.Url('user', 'logout')
-            }).done(function (data) {
-                location.href = 'index.html';
-            });
-        }
-        
         var user = {
             change: function (id) {
                 var form = $("<div />",{
@@ -532,6 +309,241 @@
                     console.log('setTimeout');
                 }, 700);
             }
+        }
+
+        var emails = {
+            load: function(){
+                uget({
+                    url: LinkServer.Url('sns', 'get')
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        var listEmails = data._response;
+                        if(listEmails.length >= 1){
+                            for (var i = 0; i <= listEmails.length - 1; i++){
+                                var tr = $('<tr/>');
+
+                                $('<td/>')
+                                    .html(listEmails[i]['Endpoint'])
+                                    .appendTo(tr);
+
+                                $('<td/>', {
+                                        class: 'text-center'
+                                }).html(
+                                    $('<a/>', {
+                                        href: 'javascript: emails.delete(\'' + listEmails[i]['SubscriptionArn'] + '\')',
+                                        class: 'red'
+                                    }).css({
+                                        cursor: 'pointer'
+                                    }).html(
+                                        '<i class="glyphicon glyphicon-trash"></i> Eliminar'
+                                    )
+                                ).appendTo(tr);
+
+                                $('#emailList tbody').append(tr);
+                            }
+                            $('#emailList tfoot').html('');
+                        }else{
+                            $('#emailList tfoot').html('');
+                            var tr = $('<tr/>');
+
+                            $('<td/>').html(
+                                $('<input/>', {
+                                    class: 'form-control',
+                                    id: 'newEmailForList',
+                                    name: 'email',
+                                    type: 'email',
+                                    placeholder: 'Email'
+                                })
+                            ).appendTo(tr);
+
+                            $('<td/>').html(
+                                $('<button/>',{
+                                    class: 'btn-info form-control',
+                                    name: 'email',
+                                    type: 'button',
+                                    placeholder: 'Email',
+                                    text: 'Agregar'
+                                }).click(function(){
+                                    var email = $('#newEmailForList').val();
+                                    if(email != ''){
+                                        uget({
+                                            type: 'POST',
+                                            url: LinkServer.Url('sns', 'subscribe'),
+                                            data: {
+                                                'TopicArn': 'arn:aws:sns:us-east-1:'+ AccountId +':NotifyMe',
+                                                'Endpoint': email
+                                            }
+                                        }).done(function (data) {
+                                            if(data._code != 200) {
+                                                showModal("No se pudo subscribir el correo: " + email);
+                                            } else {
+                                                showModal("Correo suscrito exitosamente.");
+
+                                                // Solicitud de suscripción recibida! 
+
+                                                // Un mensaje de confirmación será enviado al punto final suscrito. Una vez que el pago ha sido confirmado, el punto final recibirá notificaciones de este tema. 
+                                                // Suscripciones expirarán al cabo de 3 días si no se ha confirmado.
+
+                                                emails.load();
+                                            }
+                                        });
+                                    }else{
+                                        showModal("Debe rellenar el campo!");
+                                    }
+                                })
+                            ).appendTo(tr);
+
+                            $('#emailList tfoot').append(tr);
+                        }
+                    }
+                });
+            },
+            delete: function(arn){
+                var footer = $("<div />");
+
+                $("<button/>",{
+                    class: 'btn btn-default',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Cancelar").appendTo(footer);
+
+                $("<button/>",{
+                    class: 'btn btn-danger',
+                    type: 'button'
+                }).click(function(){
+                    console.log(arn);
+                    uget({
+                        type: 'POST',
+                        url: LinkServer.Url('sns', 'unsubscribe'),
+                        data: {
+                            SubscriptionArn: arn
+                        }
+                    }).done(function (data){
+                        if(data._code != 200) {
+                            showModal("No se pudo eliminar el email: " + data._message);
+                        } else {
+                            showModal("Email eliminado");
+                            emails.load();
+                        }
+                    });
+                    $('#myModal').modal('hide');
+                }).html('<i class="glyphicon glyphicon-trash"></i> Eliminar').appendTo(footer);
+
+                $('#myModal .modal-title').html('Eliminar Email');
+                $('#myModal .contex-text').html('<p>Desea eliminar este Email?</p>');
+                $('#myModal .modal-footer').html(footer);
+                $('#myModal').modal('show');
+
+                setTimeout(function(){
+                    $('#myModal .btn-danger').focus();
+                    console.log('setTimeout');
+                }, 700);
+            }
+        }
+
+        function showModal(context){
+            var footer = $("<button/>",{
+                    class: 'btn btn-primary',
+                    'data-dismiss': 'modal',
+                    type: 'button'
+                }).html("Aceptar");
+            $('#myModal .modal-title').html('Console - Soluntech');
+            $('#myModal .modal-footer').html(footer);
+            $('#myModal .contex-text').text(context);
+            $('#myModal').modal('show');
+        }
+        
+        function loadUsers () {
+            uget({
+                url: LinkServer.Url('account', 'users')
+            }).done(function (data) {
+                if(data._code === 200) {
+                    var table = $("#table-users tbody");
+                    table.html("");
+                    
+                    for(var i in data._response) {
+                        var d = data._response[i];
+                        $("<tr/>").append(
+                            $("<td/>", {
+                                html: d.user
+                            })
+                        ).append(
+                            $("<td/>", {
+                                html: d.name
+                            })
+                        ).append(
+                            $("<td/>",{
+                                class: 'text-center'
+                            }).html(
+                                $("<a/>", {
+                                    html: '<i class="glyphicon glyphicon-edit"></i> Editar',
+                                    href: 'javascript: user.change(' + d.iduser + ')'
+                                })
+                            )
+                        ).append(
+                            $("<td/>",{
+                                class: 'text-center'
+                            }).html(
+                                $("<a/>", {
+                                    html: '<i class="glyphicon glyphicon-trash"></i> Eliminar',
+                                    class: 'red',
+                                    href: 'javascript: user.delete(' + d.iduser + ')'
+                                })
+                            )
+                        ).appendTo(table);
+                    }
+                    
+                    if(first) {
+                        $("#table-users").tablesorter();
+                        first = false;
+                    }
+                } else {
+                    showModal("No tienes suficientes permisos para estar en esta seccion.");
+                }
+            });
+        }
+        
+        $(function () {
+            uget({
+                url: LinkServer.Url('user', 'active')
+            }).done(function (data) {
+                if(data._code !== 200) {
+                    logout();
+                } else {
+                    $('#userName').text(data._response['user']);
+
+                    loadUsers();
+                    AccountId = data._response.idaccount;
+                }
+            });
+
+            emails.load();
+            
+            $("#frm-adduser").submit(function (e) {
+                e.preventDefault();
+                
+                params = parametrizer($(this));
+                uget({
+                    type: 'POST',
+                    url: LinkServer.Url('user', 'register'),
+                    data: params
+                }).done(function (data) {
+                    if(data._code === 200) {
+                        loadUsers();
+                        showModal("Usuario agregado!");
+                    } else {
+                        showModal(data._message);
+                    }
+                });
+            });
+        });
+        
+        function logout () {
+            uget({
+                url     : LinkServer.Url('user', 'logout')
+            }).done(function (data) {
+                location.href = 'index.html';
+            });
         }
     </script>
 

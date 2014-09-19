@@ -1,7 +1,6 @@
 var LinkServer = null;
 
 $(function() {
-
     $('#side-menu').metisMenu();
 
 });
