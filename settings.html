@@ -41,6 +41,7 @@
 
             <ul class="nav navbar-top-links navbar-right">
                 <!-- /.dropdown -->
+                <li><a id="stateServices">Servicio [On]</a></li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fa fa-user fa-fw"></i> <span id="userName"></span>  <i class="fa fa-caret-down"></i>
@@ -143,7 +144,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Email</th>
-                                                <td><b>Editar</b></td>
+                                                <td><b>Acciones</b></td>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -201,6 +202,7 @@
     <script>
         var first = true;
         var AccountId = null;
+        $('#stateServices').text('Servicio [Off]');
 
         var user = {
             change: function (id) {
@@ -317,26 +319,43 @@
                     url: LinkServer.Url('sns', 'get')
                 }).done(function (data) {
                     if(data._code === 200) {
+                        $('#stateServices').text('Servicio [On]');
                         var listEmails = data._response;
+                        $('#emailList tbody').html('');
                         if(listEmails.length >= 1){
                             for (var i = 0; i <= listEmails.length - 1; i++){
                                 var tr = $('<tr/>');
-
-                                $('<td/>')
-                                    .html(listEmails[i]['Endpoint'])
-                                    .appendTo(tr);
-
-                                $('<td/>', {
-                                        class: 'text-center'
-                                }).html(
-                                    $('<a/>', {
+                                var temp = '';
+                                var temp2 = $('<a/>', {
                                         href: 'javascript: emails.delete(\'' + listEmails[i]['SubscriptionArn'] + '\')',
                                         class: 'red'
                                     }).css({
                                         cursor: 'pointer'
                                     }).html(
                                         '<i class="glyphicon glyphicon-trash"></i> Eliminar'
-                                    )
+                                    );
+
+                                if(listEmails[i]['SubscriptionArn'] == 'PendingConfirmation'){
+                                    temp = ' <span style="cursor:pointer" class="tooltipSection label label-warning">(Pendiente Confirmacion)</span>';
+                                    temp2 = '';
+                                }else if(listEmails[i]['SubscriptionArn'] == 'Deleted'){
+                                    temp2 = $('<a/>', {
+                                        href: 'javascript: emails.subscribete(\'' + listEmails[i]['Endpoint'] + '\', \'' + listEmails[i]['TopicArn'] + '\')',
+                                    }).css({
+                                        cursor: 'pointer'
+                                    }).html(
+                                        '<i class="glyphicon glyphicon-plus"></i> Volver a Suscribir'
+                                    );
+                                }
+
+                                $('<td/>')
+                                    .html(listEmails[i]['Endpoint'] + temp)
+                                    .appendTo(tr);
+
+                                $('<td/>', {
+                                        class: 'text-center'
+                                }).html(
+                                    temp2
                                 ).appendTo(tr);
 
                                 $('#emailList tbody').append(tr);
@@ -377,14 +396,32 @@
                                             if(data._code != 200) {
                                                 showModal("No se pudo subscribir el correo: " + email);
                                             } else {
-                                                showModal("Correo suscrito exitosamente.");
+                                                var form = $("<div />",{
+                                                    role: 'form'
+                                                });
 
-                                                // Solicitud de suscripción recibida! 
+                                                $("<label/>")
+                                                    .append(
+                                                        $('<h3/>').text('Solicitud de suscripción recibida!')
+                                                    ).append(
+                                                        $('<br/>')
+                                                    ).append(
+                                                        $('<p/>').css({'font-weight':'normal'}).text('Un mensaje de confirmación será enviado al correo suscrito. Una vez que sea confirmado, el correo recibirá notificaciones de las alarmas.')
+                                                    ).append(
+                                                        $('<p/>').css({'font-weight':'normal'}).text('La suscripcion expirará al cabo de 3 días si no se ha confirmado.')
+                                                    ).appendTo(form);
 
-                                                // Un mensaje de confirmación será enviado al punto final suscrito. Una vez que el pago ha sido confirmado, el punto final recibirá notificaciones de este tema. 
-                                                // Suscripciones expirarán al cabo de 3 días si no se ha confirmado.
+                                                var footer =  $("<button/>",{
+                                                    class: 'btn btn-primary',
+                                                    'data-dismiss': 'modal',
+                                                    type: 'button'
+                                                }).html("Aceptar");
 
-                                                emails.load();
+                                                $('#myModal > div').removeClass('modal-sm');
+                                                $('#myModal .modal-title').html('Console - Soluntech');
+                                                $('#myModal .contex-text').html(form);
+                                                $('#myModal .modal-footer').html(footer);
+                                                $('#myModal').modal('show');
                                             }
                                         });
                                     }else{
@@ -398,7 +435,54 @@
                     }
                 });
             },
-            delete: function(arn){
+            refresh: function () {
+                emails.load();
+                setTimeout(function(){
+                    emails.refresh();
+                }, 10000);
+            },
+            subscribete: function (Endpoint, TopicArn) {
+                uget({
+                    type: 'POST',
+                    url: LinkServer.Url('sns', 'subscribe'),
+                    data: {
+                        'TopicArn': TopicArn,
+                        'Endpoint': Endpoint
+                    }
+                }).done(function (data) {
+                    if(data._code != 200) {
+                        showModal("No se pudo volver a subscribir el correo: " + email);
+                    } else {
+                        var form = $("<div />",{
+                            role: 'form'
+                        });
+
+                        $("<label/>")
+                            .append(
+                                $('<h3/>').text('Solicitud de suscripción recibida!')
+                            ).append(
+                                $('<br/>')
+                            ).append(
+                                $('<p/>').css({'font-weight':'normal'}).text('Un mensaje de confirmación será enviado al correo suscrito. Una vez que sea confirmado, el correo recibirá notificaciones de las alarmas.')
+                            ).append(
+                                $('<p/>').css({'font-weight':'normal'}).text('La suscripcion expirará al cabo de 3 días si no se ha confirmado.')
+                            ).appendTo(form);
+
+                        var footer =  $("<button/>",{
+                            class: 'btn btn-primary',
+                            'data-dismiss': 'modal',
+                            type: 'button'
+                        }).html("Aceptar");
+
+                        $('#myModal > div').removeClass('modal-sm');
+                        $('#myModal .modal-title').html('Console - Soluntech');
+                        $('#myModal .contex-text').html(form);
+                        $('#myModal .modal-footer').html(footer);
+                        $('#myModal').modal('show');
+                    }
+                });
+            },
+            delete: function(Endpoint){
                 var footer = $("<div />");
 
                 $("<button/>",{
@@ -411,19 +495,18 @@
                     class: 'btn btn-danger',
                     type: 'button'
                 }).click(function(){
-                    console.log(arn);
+                    console.log(Endpoint);
                     uget({
                         type: 'POST',
                         url: LinkServer.Url('sns', 'unsubscribe'),
                         data: {
-                            SubscriptionArn: arn
+                            EndpointArn: Endpoint
                         }
                     }).done(function (data){
                         if(data._code != 200) {
                             showModal("No se pudo eliminar el email: " + data._message);
                         } else {
                             showModal("Email eliminado");
-                            emails.load();
                         }
                     });
                     $('#myModal').modal('hide');
@@ -503,7 +586,9 @@
             });
         }
         
-        $(function () {
+        $(function(){
+            $('.tooltipSection').tooltip('toggle');
+
             uget({
                 url: LinkServer.Url('user', 'active')
             }).done(function (data) {
@@ -517,7 +602,7 @@
                 }
             });
 
-            emails.load();
+            emails.refresh();
             
             $("#frm-adduser").submit(function (e) {
                 e.preventDefault();

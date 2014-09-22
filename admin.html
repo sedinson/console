@@ -43,7 +43,7 @@
                 <!-- /.dropdown -->
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        <i class="fa fa-user fa-fw"></i> <span id="userName"></span>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="settings-admin.html"><i class="fa fa-gear fa-fw"></i> Configurar</a>
@@ -218,6 +218,7 @@
                 if(data._code !== 200) {
                     logout();
                 } else {
+                    $('#userName').text(data._response['user']);
                     Accounts.load();
                 }
             });

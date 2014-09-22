@@ -634,20 +634,30 @@ $(function () {
     uget({
         url: LinkServer.Url('sns', 'get')
     }).done(function (data) {
-        var sw = 'none';
-        var sw2 = 'block';
+        var sw = 'block';
+        var sw2 = 'none';
+
         if(data._code === 200) {
+            $('#stateServices').text('Servicio [On]');
             var listEmails = data._response;
             if(listEmails.length >= 1){
-                sw = 'block';
-                sw2 = 'none';
-
-                Alarms.refresh();
-                Instances.load();
+                for (var i = 0; i < listEmails.length; i++){
+                    if(listEmails[i]['SubscriptionArn'] === 'Deleted' || listEmails[i]['SubscriptionArn'] === 'PendingConfirmation'){
+                        sw = 'none';
+                        sw2 = 'block';
+                    }
+                }
+            }else{
+                sw = 'none';
+                sw2 = 'block';
             }
         }
 
         if(sw === 'none'){ createSnsMessage(); }
+        else{
+            Alarms.refresh();
+            Instances.load();            
+        }
         $('#alarms-page').css({'display': sw});
         $('#sns').css({'display': sw2});
     });
@@ -695,6 +705,8 @@ function createSnsMessage(){
                     $('<div/>', {
                         class: 'alert alert-info text-center col-md-6 center-block',
                         role: 'alert'
+                    }).css({
+                        float: 'none'
                     }).append(
                         $('<p/>').html(
                             'Para poder activar sus Alarmas, debe configurar su correo a donde desea recibir todas las notificaciones de las Alarmas. Para configurar su correo haga click <a href="settings.html"><strong>Aqui!</strong></a> y se dirige a la seccion de <strong>correos para Alarmas</strong>.'
@@ -839,35 +851,35 @@ function editAlarm(iterator){
     });
 }
 
-function modalConfirm (context, method, others) {
-    $('#myModal .modal-footer').html('<button data-dismiss="modal" type="button" class="btn btn-default">Cancelar</button><button onclick="modalOk(\''+method+'\',\''+others+'\')" type="button" class="btn btn-primary">Aceptar</button>');
-    
-    showModal(context);
-}
-
-function modalOk(method, others){
-    console.log( method );
-    if(method == 'deleteInstance'){
-    	var del = { 'AlarmName': others }
-	    uget({
-	        url : LinkServer.Url('alarm', 'delete'),
-	        type: 'DELETE',
-	        data: del
-	    }).done(function (data) {
-	        Alarms.refresh();
-	    });
-    }
-
-    $('#myModal').modal('hide');
-    // restoreModal();
-}
-
-// function restoreModal(){
-// 	$('#myModal .modal-footer').html('<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>');
-// }
-
 function AlarmDelete (name) {
-	modalConfirm('Realmente deseas eliminar esta Alarma?','deleteInstance', name);
+    var footer = $("<div/>");
+
+    $("<button/>",{
+        class: 'btn btn-default',
+        'data-dismiss': 'modal',
+        type: 'button'
+    }).html("Cancelar").appendTo(footer);
+
+    $("<button/>",{
+        class: 'btn btn-danger',
+        type: 'button'
+    }).html('<i class="glyphicon glyphicon-trash"></i> Eliminar')
+    .click(function (e){
+        var del = { 'AlarmName': name }
+        uget({
+            url : LinkServer.Url('alarm', 'delete'),
+            type: 'DELETE',
+            data: del
+        }).done(function (data) {
+            Alarms.refresh();
+        });
+        $('#myModal').modal('hide');
+    }).appendTo(footer);
+
+    $('#myModal .modal-title').html('Console - Soluntech');
+    $('#myModal .modal-footer').html(footer);
+    $('#myModal .contex-text').text('Realmente deseas eliminar esta Alarma?');
+    $('#myModal').modal('show');
 }
 
 function createNameAlarm() {
