@@ -377,7 +377,7 @@ var Alarms = {
                                         '</div>'+
                                     '</div>';
 
-                                html += '<div class="well col-md-5" style="margin-left:2%;">'+
+                                /*html += '<div class="well col-md-5" style="margin-left:2%;">'+
                                             '<h4>Historial</h4>'+
                                             '<div id="history'+ i +'">'+
                                                 '<ul class="timeline">'+
@@ -420,7 +420,7 @@ var Alarms = {
                                                     '</li>'+
                                                 '</ul>'+
                                             '</div>'+
-                                        '</div>';   
+                                        '</div>';  */
                                 html += "</div></div>";
 
                                 cpu.append(html);

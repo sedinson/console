@@ -320,9 +320,26 @@ function newScheduler (data, prev) {
 }
 
 function modalConfirm (context, method) {
-    $('.modal-footer').html('<button data-dismiss="modal" type="button" class="btn btn-default">Cancel</button><button onclick="modalOk(\''+method+'\')" type="button" class="btn btn-primary">Ok</button>');
+    var footer = $("<div/>");
+
+    $("<button/>",{
+        class: 'btn btn-default',
+        'data-dismiss': 'modal',
+        type: 'button'
+    }).html("Cancelar").appendTo(footer);
+
+    $("<button/>",{
+        class: 'btn btn-primary',
+        type: 'button'
+    }).html("Aceptar").click(function(e){
+        modalOk(method)
+    }).appendTo(footer);
     
-    showModal(context);
+    $('#myModal .modal-title').html('Console - Soluntech');
+    $('#myModal .modal-footer').html(footer);
+    $('#myModal .contex-text').text(context);
+    $('#myModal').modal('show');
+    console.log(method);
 }
 
 function modalOk(method){
